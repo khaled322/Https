@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Cairo:wght@400;700&display=swap" rel="stylesheet"/>
-    <!-- إضافة Firebase SDK -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"></script>
     <style>
@@ -173,7 +173,7 @@
     </div>
 
     <script>
-        // تهيئة Firebase باستخدام بيانات التكوين الخاصة بك
+        // تهيئة Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCCQRblRXdM9vHYk_vitoMaDihD-YlXwzc",
             authDomain: "login-5ab63.firebaseapp.com",
@@ -183,171 +183,166 @@
             appId: "1:114075832736:web:ea26dba6a7250417c594c5",
             measurementId: "G-W61905Q2Q1"
         };
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
 
-        // المتغيرات
-        const togglePassword = document.querySelector('#togglePassword');
-        const password = document.querySelector('#password');
-        const toggleRegisterPassword = document.querySelector('#toggleRegisterPassword');
-        const registerPassword = document.querySelector('#registerPassword');
-        const toggleConfirmPassword = document.querySelector('#toggleConfirmPassword');
-        const confirmPassword = document.querySelector('#confirmPassword');
-        const showRegisterForm = document.querySelector('#showRegisterForm');
-        const showLoginForm = document.querySelector('#showLoginForm');
-        const loginForm = document.querySelector('#loginForm');
-        const registerForm = document.querySelector('#registerForm');
-        const passwordError = document.querySelector('#passwordError');
-        const registerError = document.querySelector('#registerError');
-        const loginError = document.querySelector('#loginError');
-        const registrationForm = document.querySelector('#registrationForm');
-        const loginFormSubmit = document.querySelector('#loginFormSubmit');
-        const toggleDarkMode = document.querySelector('#toggleDarkMode');
-        const toggleLanguage = document.querySelector('#toggleLanguage');
-        const htmlRoot = document.querySelector('#htmlRoot');
+        // التحقق من تحميل Firebase قبل المتابعة
+        if (typeof firebase !== 'undefined') {
+            firebase.initializeApp(firebaseConfig);
+            const auth = firebase.auth();
 
-        // وظيفة تبديل رؤية كلمة المرور
-        function togglePasswordVisibility(input, toggle) {
-            toggle.addEventListener('click', function () {
-                const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
-                input.setAttribute('type', type);
-                this.classList.toggle('fa-eye-slash');
+            // المتغيرات
+            const togglePassword = document.querySelector('#togglePassword');
+            const password = document.querySelector('#password');
+            const toggleRegisterPassword = document.querySelector('#toggleRegisterPassword');
+            const registerPassword = document.querySelector('#registerPassword');
+            const toggleConfirmPassword = document.querySelector('#toggleConfirmPassword');
+            const confirmPassword = document.querySelector('#confirmPassword');
+            const showRegisterForm = document.querySelector('#showRegisterForm');
+            const showLoginForm = document.querySelector('#showLoginForm');
+            const loginForm = document.querySelector('#loginForm');
+            const registerForm = document.querySelector('#registerForm');
+            const passwordError = document.querySelector('#passwordError');
+            const registerError = document.querySelector('#registerError');
+            const loginError = document.querySelector('#loginError');
+            const registrationForm = document.querySelector('#registrationForm');
+            const loginFormSubmit = document.querySelector('#loginFormSubmit');
+            const toggleDarkMode = document.querySelector('#toggleDarkMode');
+            const toggleLanguage = document.querySelector('#toggleLanguage');
+            const htmlRoot = document.querySelector('#htmlRoot');
+
+            // وظيفة تبديل رؤية كلمة المرور
+            function togglePasswordVisibility(input, toggle) {
+                if (toggle) {
+                    toggle.addEventListener('click', function () {
+                        const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                        input.setAttribute('type', type);
+                        this.classList.toggle('fa-eye-slash');
+                    });
+                }
+            }
+            togglePasswordVisibility(password, togglePassword);
+            togglePasswordVisibility(registerPassword, toggleRegisterPassword);
+            togglePasswordVisibility(confirmPassword, toggleConfirmPassword);
+
+            // التبديل بين النماذج
+            showRegisterForm.addEventListener('click', function () {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
             });
-        }
-        togglePasswordVisibility(password, togglePassword);
-        togglePasswordVisibility(registerPassword, toggleRegisterPassword);
-        togglePasswordVisibility(confirmPassword, toggleConfirmPassword);
+            showLoginForm.addEventListener('click', function () {
+                registerForm.classList.add('hidden');
+                loginForm.classList.remove('hidden');
+            });
 
-        // التبديل بين النماذج
-        showRegisterForm.addEventListener('click', function () {
-            loginForm.classList.add('hidden');
-            registerForm.classList.remove('hidden');
-        });
-        showLoginForm.addEventListener('click', function () {
-            registerForm.classList.add('hidden');
-            loginForm.classList.remove('hidden');
-        });
+            // التحقق من تطابق كلمات المرور
+            confirmPassword.addEventListener('input', function () {
+                if (registerPassword.value !== confirmPassword.value) {
+                    passwordError.classList.remove('hidden');
+                } else {
+                    passwordError.classList.add('hidden');
+                }
+            });
 
-        // التحقق من تطابق كلمات المرور في التسجيل
-        confirmPassword.addEventListener('input', function () {
-            if (registerPassword.value !== confirmPassword.value) {
-                passwordError.classList.remove('hidden');
-            } else {
-                passwordError.classList.add('hidden');
+            // تسجيل الدخول مع Firebase
+            loginFormSubmit.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const email = document.querySelector('#loginEmail').value;
+                const password = document.querySelector('#password').value;
+
+                auth.signInWithEmailAndPassword(email, password)
+                    .then((userCredential) => {
+                        console.log('تم تسجيل الدخول بنجاح:', userCredential.user);
+                        alert('تم تسجيل الدخول بنجاح!');
+                    })
+                    .catch((error) => {
+                        loginError.classList.remove('hidden');
+                        loginError.textContent = error.message;
+                        console.error('خطأ في تسجيل الدخول:', error.code, error.message);
+                    });
+            });
+
+            // إنشاء حساب مع Firebase
+            registrationForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const firstName = document.querySelector('#firstName').value;
+                const lastName = document.querySelector('#lastName').value;
+                const email = document.querySelector('#registerEmail').value;
+                const password = registerPassword.value;
+                const confirmPasswordVal = confirmPassword.value;
+
+                if (password !== confirmPasswordVal) {
+                    passwordError.classList.remove('hidden');
+                    return;
+                }
+
+                auth.createUserWithEmailAndPassword(email, password)
+                    .then((userCredential) => {
+                        console.log('تم إنشاء الحساب بنجاح:', userCredential.user);
+                        alert('تم إنشاء الحساب بنجاح!');
+                    })
+                    .catch((error) => {
+                        registerError.classList.remove('hidden');
+                        registerError.textContent = error.message;
+                        console.error('خطأ في إنشاء الحساب:', error.code, error.message);
+                    });
+            });
+
+            // تبديل الوضع الداكن
+            toggleDarkMode.addEventListener('click', function () {
+                document.body.classList.toggle('dark-mode');
+                const isDark = document.body.classList.contains('dark-mode');
+                this.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+                localStorage.setItem('darkMode', isDark);
+            });
+
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.body.classList.add('dark-mode');
+                toggleDarkMode.innerHTML = '<i class="fas fa-sun"></i>';
             }
-        });
 
-        // تسجيل الدخول باستخدام Firebase
-        loginFormSubmit.addEventListener('submit', function (e) {
-            e.preventDefault();
-            const email = document.querySelector('#loginEmail').value;
-            const password = document.querySelector('#password').value;
+            // تبديل اللغة وضبط موقع الأيقونة
+            let currentLang = 'ar';
+            const eyeIcons = [togglePassword, toggleRegisterPassword, toggleConfirmPassword];
+            toggleLanguage.addEventListener('click', function () {
+                currentLang = currentLang === 'ar' ? 'en' : 'ar';
+                htmlRoot.setAttribute('lang', currentLang);
+                htmlRoot.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
+                toggleLanguage.textContent = currentLang === 'ar' ? 'EN' : 'AR';
+                updateTextContent();
 
-            auth.signInWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    // نجاح تسجيل الدخول
-                    const user = userCredential.user;
-                    console.log('تم تسجيل الدخول بنجاح:', user);
-                    alert('تم تسجيل الدخول بنجاح!');
-                    // يمكنك هنا إعادة توجيه المستخدم إلى صفحة أخرى إذا أردت
-                })
-                .catch((error) => {
-                    // التعامل مع الأخطاء
-                    const errorCode = error.code;
-                    const errorMessage = error.message;
-                    loginError.classList.remove('hidden');
-                    loginError.textContent = errorMessage;
-                    console.error('خطأ في تسجيل الدخول:', errorCode, errorMessage);
+                eyeIcons.forEach(icon => {
+                    if (currentLang === 'ar') {
+                        icon.classList.remove('right-3');
+                        icon.classList.add('left-3');
+                    } else {
+                        icon.classList.remove('left-3');
+                        icon.classList.add('right-3');
+                    }
                 });
-        });
+            });
 
-        // إنشاء حساب جديد باستخدام Firebase
-        registrationForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-            const firstName = document.querySelector('#firstName').value;
-            const lastName = document.querySelector('#lastName').value;
-            const email = document.querySelector('#registerEmail').value;
-            const password = registerPassword.value;
-            const confirmPasswordVal = confirmPassword.value;
-
-            if (password !== confirmPasswordVal) {
-                passwordError.classList.remove('hidden');
-                return;
+            // تحديث النصوص بناءً على اللغة
+            function updateTextContent() {
+                document.querySelectorAll('[data-ar][data-en]').forEach(element => {
+                    const text = element.getAttribute(`data-${currentLang}`);
+                    if (element.tagName === 'INPUT') {
+                        element.placeholder = text;
+                    } else if (element.tagName === 'TITLE') {
+                        document.title = text;
+                    } else {
+                        element.textContent = text;
+                    }
+                });
             }
 
-            auth.createUserWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    // نجاح إنشاء الحساب
-                    const user = userCredential.user;
-                    console.log('تم إنشاء الحساب بنجاح:', user);
-                    alert('تم إنشاء الحساب بنجاح!');
-                    // يمكنك هنا إضافة بيانات إضافية مثل الاسم إلى قاعدة البيانات إذا أردت
-                })
-                .catch((error) => {
-                    // التعامل مع الأخطاء
-                    const errorCode = error.code;
-                    const errorMessage = error.message;
-                    registerError.classList.remove('hidden');
-                    registerError.textContent = errorMessage;
-                    console.error('خطأ في إنشاء الحساب:', errorCode, errorMessage);
-                });
-        });
-
-        // تبديل الوضع الداكن
-        toggleDarkMode.addEventListener('click', function () {
-            document.body.classList.toggle('dark-mode');
-            const isDark = document.body.classList.contains('dark-mode');
-            this.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-            localStorage.setItem('darkMode', isDark);
-        });
-
-        // استعادة الوضع الداكن
-        if (localStorage.getItem('darkMode') === 'true') {
-            document.body.classList.add('dark-mode');
-            toggleDarkMode.innerHTML = '<i class="fas fa-sun"></i>';
-        }
-
-        // تبديل اللغة وضبط موقع أيقونة العين
-        let currentLang = 'ar';
-        const eyeIcons = [togglePassword, toggleRegisterPassword, toggleConfirmPassword];
-        toggleLanguage.addEventListener('click', function () {
-            currentLang = currentLang === 'ar' ? 'en' : 'ar';
-            htmlRoot.setAttribute('lang', currentLang);
-            htmlRoot.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
-            toggleLanguage.textContent = currentLang === 'ar' ? 'EN' : 'AR';
-            updateTextContent();
-
+            // ضبط الموقع الافتراضي للأيقونات
             eyeIcons.forEach(icon => {
                 if (currentLang === 'ar') {
-                    icon.classList.remove('right-3');
                     icon.classList.add('left-3');
-                } else {
-                    icon.classList.remove('left-3');
-                    icon.classList.add('right-3');
                 }
             });
-        });
-
-        // تحديث النصوص بناءً على اللغة
-        function updateTextContent() {
-            document.querySelectorAll('[data-ar][data-en]').forEach(element => {
-                const text = element.getAttribute(`data-${currentLang}`);
-                if (element.tagName === 'INPUT') {
-                    element.placeholder = text;
-                } else if (element.tagName === 'TITLE') {
-                    document.title = text;
-                } else {
-                    element.textContent = text;
-                }
-            });
+        } else {
+            console.error('لم يتم تحميل Firebase بشكل صحيح.');
         }
-
-        // ضبط الموقع الافتراضي للأيقونات
-        eyeIcons.forEach(icon => {
-            if (currentLang === 'ar') {
-                icon.classList.add('left-3');
-            }
-        });
     </script>
 </body>
 </html>
