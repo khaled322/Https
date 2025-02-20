@@ -1,119 +1,192 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl" id="htmlRoot">
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Tadjir Help Login</title>
+    <title data-ar="تسجيل الدخول - تاجر هيلب" data-en="Login - Tadjir Help">تسجيل الدخول - تاجر هيلب</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Cairo:wght@400;700&display=swap" rel="stylesheet"/>
+    <!-- إضافة Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"></script>
     <style>
         body {
-            font-family: 'Roboto', sans-serif;
+            font-family: 'Cairo', 'Roboto', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .dark-mode {
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+        .dark-mode input {
+            background-color: #2d3748;
+            color: #e2e8f0;
+            border-color: #4a5568;
+        }
+        .dark-mode button {
+            background-color: #ecc94b;
+            color: #1a202c;
+        }
+        .dark-mode a {
+            color: #e2e8f0;
+        }
+        .relative input {
+            padding-left: 2.5rem;
+            padding-right: 2.5rem;
         }
     </style>
 </head>
-  <style>
-/* إخفاء اسم المدونة، الوصف، والأجزاء الافتراضية */
-.header h1, .header h2, .blog-title, .blog-description, #Header1, .titlewrapper {
-    display: none !important;
-}
-
-/* إخفاء زر Home */
-.PageList ul li:first-child {
-    display: none !important;
-}
-
-/* إخفاء "Powered by Blogger" */
-.widget-powered-by, .blogger-button {
-    display: none !important;
-}
-
-/* إخفاء "View web version" */
-.view-web-version, a[href*='view=classic'], a[href*='view=timeslide'], 
-a[href*='view=flipcard'], a[href*='view=sidebar'], a[href*='view=magazine'], a[href*='view=mosaic'] {
-    display: none !important;
-}
-
-/* إخفاء العناوين في الصفحات */
-body.page .post-title, body.page .post-header, body.page .post-footer {
-    display: none !important;
-}
-</style>
-
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    let selectors = [
-        ".header h1", ".header h2", ".blog-title", ".blog-description", "#Header1", ".titlewrapper", 
-        ".PageList ul li:first-child", ".widget-powered-by", ".blogger-button", 
-        ".view-web-version", "a[href*='view=classic']", "a[href*='view=timeslide']", 
-        "a[href*='view=flipcard']", "a[href*='view=sidebar']", "a[href*='view=magazine']", "a[href*='view=mosaic']", 
-        "body.page .post-title", "body.page .post-header", "body.page .post-footer"
-    ];
-    
-    selectors.forEach(selector => {
-        document.querySelectorAll(selector).forEach(el => el.remove());
-    });
-});
-</script>
 <body class="bg-white flex items-center justify-center min-h-screen">
+    <!-- أزرار التحكم -->
+    <div class="fixed top-4 left-4 flex space-x-4">
+        <button id="toggleDarkMode" class="bg-gray-200 px-3 py-1 rounded-md" aria-label="تبديل الوضع الداكن">
+            <i class="fas fa-moon"></i>
+        </button>
+        <button id="toggleLanguage" class="bg-gray-200 px-3 py-1 rounded-md" aria-label="تغيير اللغة">EN</button>
+    </div>
+
+    <!-- نموذج تسجيل الدخول -->
     <div id="loginForm" class="w-full max-w-sm mx-auto p-4">
         <div class="text-center mb-8">
             <h2 class="text-4xl font-bold">
-                Tadjir
-                <span class="text-yellow-500">Help</span>
+                <span data-ar="تاجر" data-en="Tadjir">تاجر</span>
+                <span class="text-yellow-500" data-ar="هيلب" data-en="Help">هيلب</span>
             </h2>
         </div>
-        <form class="space-y-4">
-            <input class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" placeholder="Enter email" type="email"/>
+        <form class="space-y-4" id="loginFormSubmit">
+            <input class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
+                   placeholder="أدخل البريد الإلكتروني" 
+                   data-ar="أدخل البريد الإلكتروني" 
+                   data-en="Enter email" 
+                   type="email" 
+                   id="loginEmail" 
+                   aria-label="البريد الإلكتروني" 
+                   required/>
             <div class="relative">
-                <input class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" id="password" placeholder="Enter password" type="password"/>
-                <i class="fas fa-eye absolute right-3 top-3 cursor-pointer" id="togglePassword"></i>
+                <input class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
+                       id="password" 
+                       placeholder="أدخل كلمة المرور" 
+                       data-ar="أدخل كلمة المرور" 
+                       data-en="Enter password" 
+                       type="password" 
+                       aria-label="كلمة المرور" 
+                       required/>
+                <i class="fas fa-eye absolute left-3 top-3 cursor-pointer" id="togglePassword" aria-label="إظهار/إخفاء كلمة المرور"></i>
             </div>
-            <div class="text-right">
-                <a class="text-sm text-gray-600" href="#">Forget Password?</a>
+            <div class="text-left">
+                <a class="text-sm text-gray-600 hover:underline" 
+                   href="#" 
+                   data-ar="نسيت كلمة المرور؟" 
+                   data-en="Forgot Password?">نسيت كلمة المرور؟</a>
             </div>
-            <button class="w-full bg-yellow-500 text-white py-2 rounded-md font-bold" type="submit">Login</button>
+            <p id="loginError" class="text-red-500 text-sm hidden"></p>
+            <button class="w-full bg-yellow-500 text-white py-2 rounded-md font-bold" 
+                    type="submit" 
+                    data-ar="تسجيل الدخول" 
+                    data-en="Login">تسجيل الدخول</button>
         </form>
         <div class="text-center mt-4">
             <p class="text-sm text-gray-600">
-                Not registered yet?
-                <a class="text-black font-bold cursor-pointer" id="showRegisterForm">Create Account</a>
+                <span data-ar="ليس لديك حساب بعد؟" data-en="Not registered yet?">ليس لديك حساب بعد؟</span>
+                <a class="text-black font-bold cursor-pointer hover:underline" 
+                   id="showRegisterForm" 
+                   data-ar="إنشاء حساب" 
+                   data-en="Create Account">إنشاء حساب</a>
             </p>
         </div>
     </div>
 
+    <!-- نموذج التسجيل -->
     <div id="registerForm" class="w-full max-w-sm mx-auto p-4 hidden">
         <div class="text-center mb-8">
             <h2 class="text-4xl font-bold">
-                Tadjir
-                <span class="text-yellow-500">Help</span>
+                <span data-ar="تاجر" data-en="Tadjir">تاجر</span>
+                <span class="text-yellow-500" data-ar="هيلب" data-en="Help">هيلب</span>
             </h2>
         </div>
         <form class="space-y-4" id="registrationForm">
-            <input class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" placeholder="First Name" type="text" id="firstName" required/>
-            <input class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" placeholder="Last Name" type="text" id="lastName" required/>
-            <input class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" placeholder="Enter email" type="email" id="registerEmail" required/>
+            <input class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
+                   placeholder="الاسم الأول" 
+                   data-ar="الاسم الأول" 
+                   data-en="First Name" 
+                   type="text" 
+                   id="firstName" 
+                   aria-label="الاسم الأول" 
+                   required/>
+            <input class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
+                   placeholder="اسم العائلة" 
+                   data-ar="اسم العائلة" 
+                   data-en="Last Name" 
+                   type="text" 
+                   id="lastName" 
+                   aria-label="اسم العائلة" 
+                   required/>
+            <input class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
+                   placeholder="أدخل البريد الإلكتروني" 
+                   data-ar="أدخل البريد الإلكتروني" 
+                   data-en="Enter email" 
+                   type="email" 
+                   id="registerEmail" 
+                   aria-label="البريد الإلكتروني" 
+                   required/>
             <div class="relative">
-                <input class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" id="registerPassword" placeholder="Enter password" type="password" required/>
-                <i class="fas fa-eye absolute right-3 top-3 cursor-pointer" id="toggleRegisterPassword"></i>
+                <input class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
+                       id="registerPassword" 
+                       placeholder="أدخل كلمة المرور" 
+                       data-ar="أدخل كلمة المرور" 
+                       data-en="Enter password" 
+                       type="password" 
+                       aria-label="كلمة المرور" 
+                       required/>
+                <i class="fas fa-eye absolute left-3 top-3 cursor-pointer" id="toggleRegisterPassword" aria-label="إظهار/إخفاء كلمة المرور"></i>
             </div>
             <div class="relative">
-                <input class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" id="confirmPassword" placeholder="Confirm password" type="password" required/>
-                <i class="fas fa-eye absolute right-3 top-3 cursor-pointer" id="toggleConfirmPassword"></i>
+                <input class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
+                       id="confirmPassword" 
+                       placeholder="تأكيد كلمة المرور" 
+                       data-ar="تأكيد كلمة المرور" 
+                       data-en="Confirm password" 
+                       type="password" 
+                       aria-label="تأكيد كلمة المرور" 
+                       required/>
+                <i class="fas fa-eye absolute left-3 top-3 cursor-pointer" id="toggleConfirmPassword" aria-label="إظهار/إخفاء كلمة المرور"></i>
             </div>
-            <p id="passwordError" class="text-red-500 hidden">Passwords do not match!</p>
-            <button class="w-full bg-yellow-500 text-white py-2 rounded-md font-bold" type="submit">Register</button>
+            <p id="passwordError" class="text-red-500 text-sm hidden" 
+               data-ar="كلمات المرور غير متطابقة!" 
+               data-en="Passwords do not match!">كلمات المرور غير متطابقة!</p>
+            <p id="registerError" class="text-red-500 text-sm hidden"></p>
+            <button class="w-full bg-yellow-500 text-white py-2 rounded-md font-bold" 
+                    type="submit" 
+                    data-ar="تسجيل" 
+                    data-en="Register">تسجيل</button>
         </form>
         <div class="text-center mt-4">
             <p class="text-sm text-gray-600">
-                Already have anaccount?
-                <a class="text-black font-bold cursor-pointer" id="showLoginForm">Login</a>
+                <span data-ar="لديك حساب بالفعل؟" data-en="Already have an account?">لديك حساب بالفعل؟</span>
+                <a class="text-black font-bold cursor-pointer hover:underline" 
+                   id="showLoginForm" 
+                   data-ar="تسجيل الدخول" 
+                   data-en="Login">تسجيل الدخول</a>
             </p>
         </div>
     </div>
 
     <script>
+        // تهيئة Firebase باستخدام بيانات التكوين الخاصة بك
+        const firebaseConfig = {
+            apiKey: "AIzaSyCCQRblRXdM9vHYk_vitoMaDihD-YlXwzc",
+            authDomain: "login-5ab63.firebaseapp.com",
+            projectId: "login-5ab63",
+            storageBucket: "login-5ab63.firebasestorage.app",
+            messagingSenderId: "114075832736",
+            appId: "1:114075832736:web:ea26dba6a7250417c594c5",
+            measurementId: "G-W61905Q2Q1"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        // المتغيرات
         const togglePassword = document.querySelector('#togglePassword');
         const password = document.querySelector('#password');
         const toggleRegisterPassword = document.querySelector('#toggleRegisterPassword');
@@ -125,42 +198,154 @@ document.addEventListener("DOMContentLoaded", function() {
         const loginForm = document.querySelector('#loginForm');
         const registerForm = document.querySelector('#registerForm');
         const passwordError = document.querySelector('#passwordError');
+        const registerError = document.querySelector('#registerError');
+        const loginError = document.querySelector('#loginError');
+        const registrationForm = document.querySelector('#registrationForm');
+        const loginFormSubmit = document.querySelector('#loginFormSubmit');
+        const toggleDarkMode = document.querySelector('#toggleDarkMode');
+        const toggleLanguage = document.querySelector('#toggleLanguage');
+        const htmlRoot = document.querySelector('#htmlRoot');
 
-        togglePassword.addEventListener('click', function (e) {
-            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-            password.setAttribute('type', type);
-            this.classList.toggle('fa-eye-slash');
-        });
+        // وظيفة تبديل رؤية كلمة المرور
+        function togglePasswordVisibility(input, toggle) {
+            toggle.addEventListener('click', function () {
+                const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                input.setAttribute('type', type);
+                this.classList.toggle('fa-eye-slash');
+            });
+        }
+        togglePasswordVisibility(password, togglePassword);
+        togglePasswordVisibility(registerPassword, toggleRegisterPassword);
+        togglePasswordVisibility(confirmPassword, toggleConfirmPassword);
 
-        toggleRegisterPassword.addEventListener('click', function (e) {
-            const type = registerPassword.getAttribute('type') === 'password' ? 'text' : 'password';
-            registerPassword.setAttribute('type', type);
-            this.classList.toggle('fa-eye-slash');
-        });
-
-        toggleConfirmPassword.addEventListener('click', function (e) {
-            const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
-            confirmPassword.setAttribute('type', type);
-            this.classList.toggle('fa-eye-slash');
-        });
-
+        // التبديل بين النماذج
         showRegisterForm.addEventListener('click', function () {
             loginForm.classList.add('hidden');
             registerForm.classList.remove('hidden');
         });
-
         showLoginForm.addEventListener('click', function () {
             registerForm.classList.add('hidden');
             loginForm.classList.remove('hidden');
         });
 
-        document.getElementById('registrationForm').addEventListener('submit', function (e) {
-            e.preventDefault();
+        // التحقق من تطابق كلمات المرور في التسجيل
+        confirmPassword.addEventListener('input', function () {
             if (registerPassword.value !== confirmPassword.value) {
                 passwordError.classList.remove('hidden');
             } else {
                 passwordError.classList.add('hidden');
-                // Proceed with registration logic
+            }
+        });
+
+        // تسجيل الدخول باستخدام Firebase
+        loginFormSubmit.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const email = document.querySelector('#loginEmail').value;
+            const password = document.querySelector('#password').value;
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // نجاح تسجيل الدخول
+                    const user = userCredential.user;
+                    console.log('تم تسجيل الدخول بنجاح:', user);
+                    alert('تم تسجيل الدخول بنجاح!');
+                    // يمكنك هنا إعادة توجيه المستخدم إلى صفحة أخرى إذا أردت
+                })
+                .catch((error) => {
+                    // التعامل مع الأخطاء
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    loginError.classList.remove('hidden');
+                    loginError.textContent = errorMessage;
+                    console.error('خطأ في تسجيل الدخول:', errorCode, errorMessage);
+                });
+        });
+
+        // إنشاء حساب جديد باستخدام Firebase
+        registrationForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const firstName = document.querySelector('#firstName').value;
+            const lastName = document.querySelector('#lastName').value;
+            const email = document.querySelector('#registerEmail').value;
+            const password = registerPassword.value;
+            const confirmPasswordVal = confirmPassword.value;
+
+            if (password !== confirmPasswordVal) {
+                passwordError.classList.remove('hidden');
+                return;
+            }
+
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // نجاح إنشاء الحساب
+                    const user = userCredential.user;
+                    console.log('تم إنشاء الحساب بنجاح:', user);
+                    alert('تم إنشاء الحساب بنجاح!');
+                    // يمكنك هنا إضافة بيانات إضافية مثل الاسم إلى قاعدة البيانات إذا أردت
+                })
+                .catch((error) => {
+                    // التعامل مع الأخطاء
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    registerError.classList.remove('hidden');
+                    registerError.textContent = errorMessage;
+                    console.error('خطأ في إنشاء الحساب:', errorCode, errorMessage);
+                });
+        });
+
+        // تبديل الوضع الداكن
+        toggleDarkMode.addEventListener('click', function () {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            this.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+            localStorage.setItem('darkMode', isDark);
+        });
+
+        // استعادة الوضع الداكن
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+            toggleDarkMode.innerHTML = '<i class="fas fa-sun"></i>';
+        }
+
+        // تبديل اللغة وضبط موقع أيقونة العين
+        let currentLang = 'ar';
+        const eyeIcons = [togglePassword, toggleRegisterPassword, toggleConfirmPassword];
+        toggleLanguage.addEventListener('click', function () {
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            htmlRoot.setAttribute('lang', currentLang);
+            htmlRoot.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
+            toggleLanguage.textContent = currentLang === 'ar' ? 'EN' : 'AR';
+            updateTextContent();
+
+            eyeIcons.forEach(icon => {
+                if (currentLang === 'ar') {
+                    icon.classList.remove('right-3');
+                    icon.classList.add('left-3');
+                } else {
+                    icon.classList.remove('left-3');
+                    icon.classList.add('right-3');
+                }
+            });
+        });
+
+        // تحديث النصوص بناءً على اللغة
+        function updateTextContent() {
+            document.querySelectorAll('[data-ar][data-en]').forEach(element => {
+                const text = element.getAttribute(`data-${currentLang}`);
+                if (element.tagName === 'INPUT') {
+                    element.placeholder = text;
+                } else if (element.tagName === 'TITLE') {
+                    document.title = text;
+                } else {
+                    element.textContent = text;
+                }
+            });
+        }
+
+        // ضبط الموقع الافتراضي للأيقونات
+        eyeIcons.forEach(icon => {
+            if (currentLang === 'ar') {
+                icon.classList.add('left-3');
             }
         });
     </script>
