@@ -9,11 +9,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Cairo:wght@400;700&display=swap" rel="stylesheet"/>
     <!-- Firebase Modular SDK -->
     <script type="module">
-        // استيراد الوحدات من Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // تكوين Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCCQRblRXdM9vHYk_vitoMaDihD-YlXwzc",
             authDomain: "login-5ab63.firebaseapp.com",
@@ -24,173 +22,243 @@
             measurementId: "G-W61905Q2Q1"
         };
 
-        // تهيئة Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const googleProvider = new GoogleAuthProvider();
 
-        // تصدير المتغيرات لاستخدامها في الكود
         window.auth = auth;
         window.signInWithEmailAndPassword = signInWithEmailAndPassword;
         window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+        window.signInWithPopup = signInWithPopup;
+        window.googleProvider = googleProvider;
     </script>
     <style>
         body {
             font-family: 'Cairo', 'Roboto', sans-serif;
-            transition: background-color 0.3s, color 0.3s;
+            transition: all 0.4s ease-in-out;
+            background-color: #ffffff;
+            color: #1a202c;
         }
         .dark-mode {
-            background-color: #1a202c;
+            background-color: #121212;
             color: #e2e8f0;
         }
+        .dark-mode #loginForm, .dark-mode #registerForm {
+            background-color: #1e1e1e;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
         .dark-mode input {
-            background-color: #2d3748;
+            background-color: #2d2d2d;
             color: #e2e8f0;
             border-color: #4a5568;
         }
-        .dark-mode button {
+        .dark-mode input:focus {
+            border-color: #ecc94b;
+            ring-color: #ecc94b;
+        }
+        .dark-mode button:not(.google-btn) {
             background-color: #ecc94b;
             color: #1a202c;
         }
-        .dark-mode a {
-            color: #e2e8f0;
+        .dark-mode button:not(.google-btn):hover {
+            background-color: #d69e2e;
         }
-        .relative input {
-            padding-left: 2.5rem;
-            padding-right: 2.5rem;
+        .dark-mode .google-btn {
+            background-color: #ffffff;
+            color: #1a202c;
+            border-color: #4a5568;
+        }
+        .dark-mode .google-btn:hover {
+            background-color: #f7fafc;
+        }
+        .dark-mode a {
+            color: #ecc94b;
+        }
+        .dark-mode .text-gray-600 {
+            color: #a0aec0;
+        }
+        /* تحسين محاذاة النصوص في الحقول */
+        .input-field, .input-field-no-icon {
+            position: relative;
+            width: 100%;
+        }
+        .input-field input, .input-field-no-icon input {
+            padding: 0.75rem 1rem;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 1rem;
+            line-height: 1.5;
+            transition: all 0.3s ease;
+        }
+        .input-field input {
+            padding-left: 2.25rem;
+            padding-right: 1rem;
+        }
+        .input-field input:focus {
+            transform: scale(1.02);
+            border-color: #ecc94b;
+            box-shadow: 0 0 5px rgba(236, 201, 75, 0.5);
+        }
+        .input-field i {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: color 0.3s ease;
+        }
+        .input-field i:hover {
+            color: #ecc94b;
+        }
+        [dir="rtl"] .input-field i {
+            left: 0.75rem;
+        }
+        [dir="ltr"] .input-field i {
+            right: 0.75rem;
+        }
+        /* تأثيرات الأزرار */
+        .btn, .google-btn {
+            transition: all 0.3s ease;
+        }
+        .btn:hover, .google-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+        .btn:active, .google-btn:active {
+            transform: scale(0.98);
+        }
+        /* تأثير الظهور والانزلاق للنماذج */
+        .form-container {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: slideIn 0.5s ease forwards;
+        }
+        .hidden {
+            display: none;
+        }
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        /* إزالة تأثير الكتابة من العنوان */
+        .title-highlight {
+            display: inline-block;
+        }
+        /* تأثير بسيط لأزرار التحكم بدون دوران */
+        #toggleDarkMode, #toggleLanguage {
+            transition: background-color 0.3s ease;
+        }
+        #toggleDarkMode:hover, #toggleLanguage:hover {
+            background-color: #ecc94b;
+            color: #1a202c;
         }
     </style>
 </head>
-<body class="bg-white flex items-center justify-center min-h-screen">
+<body class="flex items-center justify-center min-h-screen">
     <!-- أزرار التحكم -->
     <div class="fixed top-4 left-4 flex space-x-4">
-        <button id="toggleDarkMode" class="bg-gray-200 px-3 py-1 rounded-md" aria-label="تبديل الوضع الداكن">
+        <button id="toggleDarkMode" class="bg-gray-200 px-3 py-1 rounded-md dark:bg-gray-700" aria-label="تبديل الوضع الداكن">
             <i class="fas fa-moon"></i>
         </button>
-        <button id="toggleLanguage" class="bg-gray-200 px-3 py-1 rounded-md" aria-label="تغيير اللغة">EN</button>
+        <button id="toggleLanguage" class="bg-gray-200 px-3 py-1 rounded-md dark:bg-gray-700" aria-label="تغيير اللغة">EN</button>
     </div>
 
     <!-- نموذج تسجيل الدخول -->
-    <div id="loginForm" class="w-full max-w-sm mx-auto p-4">
+    <div id="loginForm" class="form-container w-full max-w-md mx-auto p-6 bg-gray-50 rounded-lg shadow-md">
         <div class="text-center mb-8">
             <h2 class="text-4xl font-bold">
                 <span data-ar="تاجر" data-en="Tadjir">تاجر</span>
-                <span class="text-yellow-500" data-ar="هيلب" data-en="Help">هيلب</span>
+                <span class="text-yellow-500 title-highlight" data-ar="هيلب" data-en="Help">هيلب</span>
             </h2>
+            <p class="text-gray-600 mt-2" data-ar="سجل الدخول إلى حسابك" data-en="Log in to your account">سجل الدخول إلى حسابك</p>
         </div>
-        <form id="loginFormSubmit" class="space-y-4">
-            <input class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
-                   placeholder="أدخل البريد الإلكتروني" 
-                   data-ar="أدخل البريد الإلكتروني" 
-                   data-en="Enter email" 
-                   type="email" 
-                   id="loginEmail" 
-                   aria-label="البريد الإلكتروني" 
-                   required/>
-            <div class="relative">
-                <input class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
-                       id="password" 
-                       placeholder="أدخل كلمة المرور" 
-                       data-ar="أدخل كلمة المرور" 
-                       data-en="Enter password" 
-                       type="password" 
-                       aria-label="كلمة المرور" 
-                       required/>
-                <i class="fas fa-eye absolute left-3 top-3 cursor-pointer" id="togglePassword" aria-label="إظهار/إخفاء كلمة المرور"></i>
+        <form id="loginFormSubmit" class="space-y-6">
+            <div class="input-field-no-icon">
+                <input class="border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
+                       placeholder="أدخل البريد الإلكتروني" data-ar="أدخل البريد الإلكتروني" data-en="Enter email" 
+                       type="email" id="loginEmail" required/>
+            </div>
+            <div class="input-field">
+                <input class="border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
+                       id="password" placeholder="أدخل كلمة المرور" data-ar="أدخل كلمة المرور" data-en="Enter password" 
+                       type="password" required/>
+                <i class="fas fa-eye" id="togglePassword"></i>
             </div>
             <div class="text-left">
-                <a class="text-sm text-gray-600 hover:underline" 
-                   href="#" 
-                   data-ar="نسيت كلمة المرور؟" 
-                   data-en="Forgot Password?">نسيت كلمة المرور؟</a>
+                <a class="text-sm text-gray-600 hover:underline" href="#" data-ar="نسيت كلمة المرور؟" data-en="Forgot Password?">نسيت كلمة المرور؟</a>
             </div>
             <p id="loginError" class="text-red-500 text-sm hidden"></p>
-            <button class="w-full bg-yellow-500 text-white py-2 rounded-md font-bold" 
-                    type="submit" 
-                    data-ar="تسجيل الدخول" 
-                    data-en="Login">تسجيل الدخول</button>
+            <button class="btn w-full bg-yellow-500 text-white py-3 rounded-md font-bold hover:bg-yellow-600" 
+                    type="submit" data-ar="تسجيل الدخول" data-en="Login">تسجيل الدخول</button>
         </form>
-        <div class="text-center mt-4">
+        <div class="mt-6">
+            <button id="googleSignIn" class="google-btn w-full bg-white border border-gray-300 text-gray-700 py-3 rounded-md font-bold flex items-center justify-center space-x-2">
+                <svg class="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-1.02.68-2.31 1.08-3.71 1.08-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C4 20.36 7.9 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.9 1 4 3.64 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                <span data-ar="تسجيل الدخول عبر Google" data-en="Sign in with Google">تسجيل الدخول عبر Google</span>
+            </button>
+        </div>
+        <div class="text-center mt-6">
             <p class="text-sm text-gray-600">
-                <span data-ar="ليس لديك حساب بعد؟" data-en="Not registered yet?">ليس لديك حساب بعد؟</span>
-                <a class="text-black font-bold cursor-pointer hover:underline" 
-                   id="showRegisterForm" 
-                   data-ar="إنشاء حساب" 
-                   data-en="Create Account">إنشاء حساب</a>
+                <span data-ar="ليس لديك حساب؟" data-en="Don't have an account?">ليس لديك حساب؟</span>
+                <a class="text-yellow-500 font-bold cursor-pointer hover:underline" id="showRegisterForm" data-ar="إنشاء حساب" data-en="Create Account">إنشاء حساب</a>
             </p>
         </div>
     </div>
 
     <!-- نموذج التسجيل -->
-    <div id="registerForm" class="w-full max-w-sm mx-auto p-4 hidden">
+    <div id="registerForm" class="form-container w-full max-w-md mx-auto p-6 bg-gray-50 rounded-lg shadow-md hidden">
         <div class="text-center mb-8">
             <h2 class="text-4xl font-bold">
                 <span data-ar="تاجر" data-en="Tadjir">تاجر</span>
-                <span class="text-yellow-500" data-ar="هيلب" data-en="Help">هيلب</span>
+                <span class="text-yellow-500 title-highlight" data-ar="هيلب" data-en="Help">هيلب</span>
             </h2>
+            <p class="text-gray-600 mt-2" data-ar="أنشئ حسابك الجديد" data-en="Create your new account">أنشئ حسابك الجديد</p>
         </div>
-        <form id="registrationForm" class="space-y-4">
-            <input class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
-                   placeholder="الاسم الأول" 
-                   data-ar="الاسم الأول" 
-                   data-en="First Name" 
-                   type="text" 
-                   id="firstName" 
-                   aria-label="الاسم الأول" 
-                   required/>
-            <input class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
-                   placeholder="اسم العائلة" 
-                   data-ar="اسم العائلة" 
-                   data-en="Last Name" 
-                   type="text" 
-                   id="lastName" 
-                   aria-label="اسم العائلة" 
-                   required/>
-            <input class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
-                   placeholder="أدخل البريد الإلكتروني" 
-                   data-ar="أدخل البريد الإلكتروني" 
-                   data-en="Enter email" 
-                   type="email" 
-                   id="registerEmail" 
-                   aria-label="البريد الإلكتروني" 
-                   required/>
-            <div class="relative">
-                <input class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
-                       id="registerPassword" 
-                       placeholder="أدخل كلمة المرور" 
-                       data-ar="أدخل كلمة المرور" 
-                       data-en="Enter password" 
-                       type="password" 
-                       aria-label="كلمة المرور" 
-                       required/>
-                <i class="fas fa-eye absolute left-3 top-3 cursor-pointer" id="toggleRegisterPassword" aria-label="إظهار/إخفاء كلمة المرور"></i>
+        <form id="registrationForm" class="space-y-6">
+            <div class="input-field-no-icon">
+                <input class="border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
+                       placeholder="الاسم الأول" data-ar="الاسم الأول" data-en="First Name" 
+                       type="text" id="firstName" required/>
             </div>
-            <div class="relative">
-                <input class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
-                       id="confirmPassword" 
-                       placeholder="تأكيد كلمة المرور" 
-                       data-ar="تأكيد كلمة المرور" 
-                       data-en="Confirm password" 
-                       type="password" 
-                       aria-label="تأكيد كلمة المرور" 
-                       required/>
-                <i class="fas fa-eye absolute left-3 top-3 cursor-pointer" id="toggleConfirmPassword" aria-label="إظهار/إخفاء كلمة المرور"></i>
+            <div class="input-field-no-icon">
+                <input class="border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
+                       placeholder="اسم العائلة" data-ar="اسم العائلة" data-en="Last Name" 
+                       type="text" id="lastName" required/>
             </div>
-            <p id="passwordError" class="text-red-500 text-sm hidden" 
-               data-ar="كلمات المرور غير متطابقة!" 
-               data-en="Passwords do not match!">كلمات المرور غير متطابقة!</p>
+            <div class="input-field-no-icon">
+                <input class="border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
+                       placeholder="أدخل البريد الإلكتروني" data-ar="أدخل البريد الإلكتروني" data-en="Enter email" 
+                       type="email" id="registerEmail" required/>
+            </div>
+            <div class="input-field">
+                <input class="border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
+                       id="registerPassword" placeholder="أدخل كلمة المرور" data-ar="أدخل كلمة المرور" data-en="Enter password" 
+                       type="password" required/>
+                <i class="fas fa-eye" id="toggleRegisterPassword"></i>
+            </div>
+            <div class="input-field">
+                <input class="border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
+                       id="confirmPassword" placeholder="تأكيد كلمة المرور" data-ar="تأكيد كلمة المرور" data-en="Confirm password" 
+                       type="password" required/>
+                <i class="fas fa-eye" id="toggleConfirmPassword"></i>
+            </div>
+            <p id="passwordError" class="text-red-500 text-sm hidden" data-ar="كلمات المرور غير متطابقة!" data-en="Passwords do not match!">كلمات المرور غير متطابقة!</p>
             <p id="registerError" class="text-red-500 text-sm hidden"></p>
-            <button class="w-full bg-yellow-500 text-white py-2 rounded-md font-bold" 
-                    type="submit" 
-                    data-ar="تسجيل" 
-                    data-en="Register">تسجيل</button>
+            <button class="btn w-full bg-yellow-500 text-white py-3 rounded-md font-bold hover:bg-yellow-600" 
+                    type="submit" data-ar="تسجيل" data-en="Register">تسجيل</button>
         </form>
-        <div class="text-center mt-4">
+        <div class="mt-6">
+            <button id="googleSignUp" class="google-btn w-full bg-white border border-gray-300 text-gray-700 py-3 rounded-md font-bold flex items-center justify-center space-x-2">
+                <svg class="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-1.02.68-2.31 1.08-3.71 1.08-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C4 20.36 7.9 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.9 1 4 3.64 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                <span data-ar="التسجيل عبر Google" data-en="Sign up with Google">التسجيل عبر Google</span>
+            </button>
+        </div>
+        <div class="text-center mt-6">
             <p class="text-sm text-gray-600">
                 <span data-ar="لديك حساب بالفعل؟" data-en="Already have an account?">لديك حساب بالفعل؟</span>
-                <a class="text-black font-bold cursor-pointer hover:underline" 
-                   id="showLoginForm" 
-                   data-ar="تسجيل الدخول" 
-                   data-en="Login">تسجيل الدخول</a>
+                <a class="text-yellow-500 font-bold cursor-pointer hover:underline" id="showLoginForm" data-ar="تسجيل الدخول" data-en="Login">تسجيل الدخول</a>
             </p>
         </div>
     </div>
