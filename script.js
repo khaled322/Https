@@ -1,17 +1,14 @@
-// هذا الكود لا يستخدم import لأنه سيتم تشغيله كـ CommonJS
-// الوظائف تعتمد على المتغيرات العامة التي تم تهيئتها في <script type="module"> في index.html
-
 document.addEventListener('DOMContentLoaded', () => {
-    // التأكد من أن Firebase قد تم تهيئته
-    if (!window.auth || !window.signInWithEmailAndPassword || !window.createUserWithEmailAndPassword) {
+    if (!window.auth || !window.signInWithEmailAndPassword || !window.createUserWithEmailAndPassword || !window.signInWithPopup || !window.googleProvider) {
         console.error('لم يتم تحميل Firebase بشكل صحيح.');
         return;
     }
 
-    // المتغيرات
     const auth = window.auth;
     const signInWithEmailAndPassword = window.signInWithEmailAndPassword;
     const createUserWithEmailAndPassword = window.createUserWithEmailAndPassword;
+    const signInWithPopup = window.signInWithPopup;
+    const googleProvider = window.googleProvider;
 
     const togglePassword = document.querySelector('#togglePassword');
     const password = document.querySelector('#password');
@@ -31,15 +28,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleDarkMode = document.querySelector('#toggleDarkMode');
     const toggleLanguage = document.querySelector('#toggleLanguage');
     const htmlRoot = document.querySelector('#htmlRoot');
+    const googleSignIn = document.querySelector('#googleSignIn');
+    const googleSignUp = document.querySelector('#googleSignUp');
 
-    // وظيفة تبديل رؤية كلمة المرور
     function togglePasswordVisibility(input, toggle) {
         if (input && toggle) {
             toggle.addEventListener('click', () => {
                 const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
                 input.setAttribute('type', type);
                 toggle.classList.toggle('fa-eye-slash');
-                console.log('تم تبديل رؤية كلمة المرور');
             });
         }
     }
@@ -47,23 +44,22 @@ document.addEventListener('DOMContentLoaded', () => {
     togglePasswordVisibility(registerPassword, toggleRegisterPassword);
     togglePasswordVisibility(confirmPassword, toggleConfirmPassword);
 
-    // التبديل بين النماذج
+    // التبديل بين النماذج مع Animation
     if (showRegisterForm) {
         showRegisterForm.addEventListener('click', () => {
             loginForm.classList.add('hidden');
             registerForm.classList.remove('hidden');
-            console.log('تم التبديل إلى نموذج التسجيل');
+            registerForm.style.animation = 'slideIn 0.5s ease forwards';
         });
     }
     if (showLoginForm) {
         showLoginForm.addEventListener('click', () => {
             registerForm.classList.add('hidden');
             loginForm.classList.remove('hidden');
-            console.log('تم التبديل إلى نموذج تسجيل الدخول');
+            loginForm.style.animation = 'slideIn 0.5s ease forwards';
         });
     }
 
-    // التحقق من تطابق كلمات المرور
     if (confirmPassword) {
         confirmPassword.addEventListener('input', () => {
             if (registerPassword.value !== confirmPassword.value) {
@@ -74,62 +70,97 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // تسجيل الدخول مع Firebase
     if (loginFormSubmit) {
-        loginFormSubmit.addEventListener('submit', (e) => {
+        loginFormSubmit.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.querySelector('#loginEmail').value;
             const password = document.querySelector('#password').value;
+            const submitButton = loginFormSubmit.querySelector('button');
+            submitButton.disabled = true;
+            submitButton.textContent = currentLang === 'ar' ? 'جارٍ التحميل...' : 'Loading...';
 
-            signInWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    console.log('تم تسجيل الدخول بنجاح:', userCredential.user);
-                    alert('تم تسجيل الدخول بنجاح!');
-                })
-                .catch((error) => {
-                    loginError.classList.remove('hidden');
-                    loginError.textContent = error.message;
-                    console.error('خطأ في تسجيل الدخول:', error.code, error.message);
-                });
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                console.log('تم تسجيل الدخول بنجاح:', userCredential.user);
+                alert('تم تسجيل الدخول بنجاح!');
+            } catch (error) {
+                loginError.classList.remove('hidden');
+                loginError.textContent = error.message;
+                console.error('خطأ في تسجيل الدخول:', error.code, error.message);
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = currentLang === 'ar' ? 'تسجيل الدخول' : 'Login';
+            }
         });
     }
 
-    // إنشاء حساب مع Firebase
     if (registrationForm) {
-        registrationForm.addEventListener('submit', (e) => {
+        registrationForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const firstName = document.querySelector('#firstName').value;
             const lastName = document.querySelector('#lastName').value;
             const email = document.querySelector('#registerEmail').value;
             const password = registerPassword.value;
             const confirmPasswordVal = confirmPassword.value;
+            const submitButton = registrationForm.querySelector('button');
+            submitButton.disabled = true;
+            submitButton.textContent = currentLang === 'ar' ? 'جارٍ التحميل...' : 'Loading...';
 
             if (password !== confirmPasswordVal) {
                 passwordError.classList.remove('hidden');
+                submitButton.disabled = false;
+                submitButton.textContent = currentLang === 'ar' ? 'تسجيل' : 'Register';
                 return;
             }
 
-            createUserWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    console.log('تم إنشاء الحساب بنجاح:', userCredential.user);
-                    alert('تم إنشاء الحساب بنجاح!');
-                })
-                .catch((error) => {
-                    registerError.classList.remove('hidden');
-                    registerError.textContent = error.message;
-                    console.error('خطأ في إنشاء الحساب:', error.code, error.message);
-                });
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                console.log('تم إنشاء الحساب بنجاح:', userCredential.user);
+                alert('تم إنشاء الحساب بنجاح!');
+            } catch (error) {
+                registerError.classList.remove('hidden');
+                registerError.textContent = error.message;
+                console.error('خطأ في إنشاء الحساب:', error.code, error.message);
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = currentLang === 'ar' ? 'تسجيل' : 'Register';
+            }
         });
     }
 
-    // تبديل الوضع الداكن
+    function handleGoogleAuth(button, actionText) {
+        button.addEventListener('click', async () => {
+            button.disabled = true;
+            const originalText = button.querySelector('span').textContent;
+            button.querySelector('span').textContent = currentLang === 'ar' ? 'جارٍ التحميل...' : 'Loading...';
+
+            try {
+                const result = await signInWithPopup(auth, googleProvider);
+                const user = result.user;
+                console.log(`${actionText} باستخدام Google:`, user);
+                alert(`تم ${actionText} بنجاح باستخدام Google!`);
+            } catch (error) {
+                const errorElement = actionText === 'تسجيل الدخول' ? loginError : registerError;
+                errorElement.classList.remove('hidden');
+                errorElement.textContent = error.message;
+                console.error(`خطأ في ${actionText} عبر Google:`, error.code, error.message);
+            } finally {
+                button.disabled = false;
+                button.querySelector('span').textContent = originalText;
+            }
+        });
+    }
+
+    if (googleSignIn) handleGoogleAuth(googleSignIn, 'تسجيل الدخول');
+    if (googleSignUp) handleGoogleAuth(googleSignUp, 'التسجيل');
+
     if (toggleDarkMode) {
         toggleDarkMode.addEventListener('click', () => {
             document.body.classList.toggle('dark-mode');
             const isDark = document.body.classList.contains('dark-mode');
             toggleDarkMode.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
             localStorage.setItem('darkMode', isDark);
-            console.log('تم تبديل الوضع الداكن:', isDark);
+            updateTextContent();
         });
 
         if (localStorage.getItem('darkMode') === 'true') {
@@ -138,7 +169,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // تبديل اللغة وضبط موقع الأيقونة
     let currentLang = 'ar';
     const eyeIcons = [togglePassword, toggleRegisterPassword, toggleConfirmPassword];
     if (toggleLanguage) {
@@ -148,7 +178,6 @@ document.addEventListener('DOMContentLoaded', () => {
             htmlRoot.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
             toggleLanguage.textContent = currentLang === 'ar' ? 'EN' : 'AR';
             updateTextContent();
-
             eyeIcons.forEach(icon => {
                 if (currentLang === 'ar') {
                     icon.classList.remove('right-3');
@@ -158,11 +187,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     icon.classList.add('right-3');
                 }
             });
-            console.log('تم تبديل اللغة إلى:', currentLang);
         });
     }
 
-    // تحديث النصوص بناءً على اللغة
     function updateTextContent() {
         document.querySelectorAll('[data-ar][data-en]').forEach(element => {
             const text = element.getAttribute(`data-${currentLang}`);
@@ -176,12 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ضبط الموقع الافتراضي للأيقونات
     eyeIcons.forEach(icon => {
-        if (icon) {
-            icon.classList.add('left-3');
-        }
+        if (icon) icon.classList.add('left-3');
     });
-
-    console.log('تم تحميل الصفحة بنجاح مع Firebase Modular SDK');
 });
