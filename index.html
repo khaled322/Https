@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Cairo:wght@400;700&display=swap" rel="stylesheet"/>
-    <!-- Firebase Modular SDK (إصدار محدث) -->
+    <!-- Firebase Modular SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -185,7 +185,7 @@
                 <i class="fas fa-eye" id="togglePassword"></i>
             </div>
             <div class="text-left">
-                <a class="text-sm text-gray-600 hover:underline" href="#" data-ar="نسيت كلمة المرور؟" data-en="Forgot Password?">نسيت كلمة المرور؟</a>
+                <a class="text-sm text-gray-600 hover:underline" href="forgot-password.html" data-ar="نسيت كلمة المرور؟" data-en="Forgot Password?">نسيت كلمة المرور؟</a>
             </div>
             <p id="loginError" class="text-red-500 text-sm hidden"></p>
             <button class="btn w-full bg-yellow-500 text-white py-3 rounded-md font-bold hover:bg-yellow-600" 
