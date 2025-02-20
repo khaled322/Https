@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // التحقق من تهيئة Firebase
     if (!window.auth || !window.signInWithEmailAndPassword || !window.createUserWithEmailAndPassword || !window.signInWithPopup || !window.googleProvider) {
-        console.error('لم يتم تحميل Firebase بشكل صحيح.');
+        console.error('لم يتم تحميل Firebase بشكل صحيح. تحقق من الاتصال أو إعدادات Firebase.');
         return;
     }
 
@@ -44,7 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
     togglePasswordVisibility(registerPassword, toggleRegisterPassword);
     togglePasswordVisibility(confirmPassword, toggleConfirmPassword);
 
-    // التبديل بين النماذج مع Animation
     if (showRegisterForm) {
         showRegisterForm.addEventListener('click', () => {
             loginForm.classList.add('hidden');
@@ -70,6 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // تسجيل الدخول باستخدام البريد وكلمة المرور
     if (loginFormSubmit) {
         loginFormSubmit.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -79,13 +80,25 @@ document.addEventListener('DOMContentLoaded', () => {
             submitButton.disabled = true;
             submitButton.textContent = currentLang === 'ar' ? 'جارٍ التحميل...' : 'Loading...';
 
+            if (!email || !password) {
+                loginError.classList.remove('hidden');
+                loginError.textContent = currentLang === 'ar' ? 'يرجى إدخال البريد وكلمة المرور' : 'Please enter email and password';
+                submitButton.disabled = false;
+                submitButton.textContent = currentLang === 'ar' ? 'تسجيل الدخول' : 'Login';
+                return;
+            }
+
             try {
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 console.log('تم تسجيل الدخول بنجاح:', userCredential.user);
                 alert('تم تسجيل الدخول بنجاح!');
             } catch (error) {
                 loginError.classList.remove('hidden');
-                loginError.textContent = error.message;
+                loginError.textContent = currentLang === 'ar' ? 
+                    (error.code === 'auth/wrong-password' ? 'كلمة المرور غير صحيحة' : 
+                     error.code === 'auth/user-not-found' ? 'المستخدم غير موجود' : 
+                     error.message) : 
+                    error.message;
                 console.error('خطأ في تسجيل الدخول:', error.code, error.message);
             } finally {
                 submitButton.disabled = false;
@@ -94,6 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // إنشاء حساب جديد
     if (registrationForm) {
         registrationForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -105,6 +119,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const submitButton = registrationForm.querySelector('button');
             submitButton.disabled = true;
             submitButton.textContent = currentLang === 'ar' ? 'جارٍ التحميل...' : 'Loading...';
+
+            if (!email || !password || !firstName || !lastName) {
+                registerError.classList.remove('hidden');
+                registerError.textContent = currentLang === 'ar' ? 'يرجى ملء جميع الحقول' : 'Please fill all fields';
+                submitButton.disabled = false;
+                submitButton.textContent = currentLang === 'ar' ? 'تسجيل' : 'Register';
+                return;
+            }
 
             if (password !== confirmPasswordVal) {
                 passwordError.classList.remove('hidden');
@@ -119,7 +141,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('تم إنشاء الحساب بنجاح!');
             } catch (error) {
                 registerError.classList.remove('hidden');
-                registerError.textContent = error.message;
+                registerError.textContent = currentLang === 'ar' ? 
+                    (error.code === 'auth/email-already-in-use' ? 'البريد الإلكتروني مستخدم بالفعل' : error.message) : 
+                    error.message;
                 console.error('خطأ في إنشاء الحساب:', error.code, error.message);
             } finally {
                 submitButton.disabled = false;
@@ -128,7 +152,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function handleGoogleAuth(button, actionText) {
+    // تسجيل الدخول عبر Google
+    function handleGoogleAuth(button, actionText, errorElement) {
         button.addEventListener('click', async () => {
             button.disabled = true;
             const originalText = button.querySelector('span').textContent;
@@ -140,9 +165,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log(`${actionText} باستخدام Google:`, user);
                 alert(`تم ${actionText} بنجاح باستخدام Google!`);
             } catch (error) {
-                const errorElement = actionText === 'تسجيل الدخول' ? loginError : registerError;
                 errorElement.classList.remove('hidden');
-                errorElement.textContent = error.message;
+                errorElement.textContent = currentLang === 'ar' ?
+                    (error.code === 'auth/popup-blocked' ? 'تم حظر النافذة المنبثقة، الرجاء السماح بها' : error.message) :
+                    error.message;
                 console.error(`خطأ في ${actionText} عبر Google:`, error.code, error.message);
             } finally {
                 button.disabled = false;
@@ -151,9 +177,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (googleSignIn) handleGoogleAuth(googleSignIn, 'تسجيل الدخول');
-    if (googleSignUp) handleGoogleAuth(googleSignUp, 'التسجيل');
+    if (googleSignIn) handleGoogleAuth(googleSignIn, 'تسجيل الدخول', loginError);
+    if (googleSignUp) handleGoogleAuth(googleSignUp, 'التسجيل', registerError);
 
+    // تبديل الوضع الداكن
     if (toggleDarkMode) {
         toggleDarkMode.addEventListener('click', () => {
             document.body.classList.toggle('dark-mode');
@@ -169,6 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // تبديل اللغة
     let currentLang = 'ar';
     const eyeIcons = [togglePassword, toggleRegisterPassword, toggleConfirmPassword];
     if (toggleLanguage) {
