@@ -1,7 +1,13 @@
 // script.js
+import { auth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, googleProvider, onAuthStateChanged } from './firebase-config.js';
+
 document.addEventListener('DOMContentLoaded', () => {
-    const auth = firebase.auth();
-    const googleProvider = new firebase.auth.GoogleAuthProvider();
+    // التحقق من حالة تسجيل الدخول
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            window.location.href = 'dashboard.html';
+        }
+    });
 
     const togglePassword = document.querySelector('#togglePassword');
     const password = document.querySelector('#password');
@@ -80,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 console.log('تم تسجيل الدخول بنجاح:', userCredential.user);
                 window.location.href = 'dashboard.html';
             } catch (error) {
@@ -126,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 console.log('تم إنشاء الحساب بنجاح:', userCredential.user);
                 window.location.href = 'dashboard.html';
             } catch (error) {
@@ -149,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
             button.querySelector('span').textContent = currentLang === 'ar' ? 'جارٍ التحميل...' : 'Loading...';
 
             try {
-                const result = await auth.signInWithPopup(googleProvider);
+                const result = await signInWithPopup(auth, googleProvider);
                 console.log(`${actionText} باستخدام Google:`, result.user);
                 window.location.href = 'dashboard.html';
             } catch (error) {
@@ -169,11 +175,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (googleSignUp) handleGoogleAuth(googleSignUp, 'التسجيل', registerError);
 
     let currentLang = localStorage.getItem('language') || 'ar';
+    const toggleDarkMode = document.getElementById('toggleDarkMode');
+    const toggleLanguage = document.getElementById('toggleLanguage');
+    const htmlRoot = document.getElementById('htmlRoot');
+
     if (toggleDarkMode) {
         const isDark = localStorage.getItem('darkMode') === 'true';
         if (isDark) {
             document.body.classList.add('dark-mode');
             toggleDarkMode.innerHTML = '<i class="fas fa-sun"></i>';
+        } else {
+            toggleDarkMode.innerHTML = '<i class="fas fa-moon"></i>';
         }
         toggleDarkMode.addEventListener('click', () => {
             document.body.classList.toggle('dark-mode');
