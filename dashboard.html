@@ -136,6 +136,12 @@
         .top-bar i:hover {
             color: #facc15;
         }
+        .loading-message {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #facc15;
+        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -174,8 +180,12 @@
             <button id="toggleLanguage" class="text-sm font-bold px-2 py-1 rounded-md bg-yellow-300 text-gray-900">EN</button>
         </div>
     </div>
+    <!-- Loading Message -->
+    <div id="loadingMessage" class="loading-message">
+        <p data-ar="جارٍ التحميل..." data-en="Loading...">جارٍ التحميل...</p>
+    </div>
     <!-- Main Content -->
-    <div class="pt-20 p-4 pb-20" id="main-content">
+    <div class="pt-20 p-4 pb-20" id="main-content" style="display: none;">
         <h2 class="text-xl font-bold mb-2" data-ar="إحصائيات سريعة" data-en="Quick Stats">إحصائيات سريعة</h2>
         <div class="grid grid-cols-2 gap-4">
             <div class="card bg-blue-200 p-4 rounded-lg flex items-center cursor-pointer" onclick="window.location.href='completed-orders.html'">
@@ -299,84 +309,103 @@
         };
 
         // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
+        try {
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
 
-        // التحقق من حالة تسجيل الدخول
-        onAuthStateChanged(auth, (user) => {
-            if (!user) {
-                window.location.href = 'index.html';
-            }
-        });
+            // Show loading message while checking auth state
+            document.getElementById('loadingMessage').style.display = 'block';
 
-        document.addEventListener('DOMContentLoaded', () => {
-            let currentLang = localStorage.getItem('language') || 'ar';
-
-            function toggleSidebar() {
-                const sidebar = document.getElementById('sidebar');
-                const overlay = document.getElementById('overlay');
-                sidebar.classList.toggle('sidebar-hidden');
-                overlay.classList.toggle('hidden');
-            }
-
-            function toggleDetails(detailId) {
-                const details = document.getElementById(detailId);
-                details.style.display = details.style.display === 'block' ? 'none' : 'block';
-            }
-
-            document.getElementById('signOutBtn').addEventListener('click', () => {
-                auth.signOut().then(() => {
+            // التحقق من حالة تسجيل الدخول
+            onAuthStateChanged(auth, (user) => {
+                console.log('Auth state changed:', user ? 'User logged in' : 'No user');
+                if (!user) {
+                    console.log('Redirecting to index.html because no user is logged in');
                     window.location.href = 'index.html';
-                }).catch(error => {
-                    console.error('Error signing out:', error);
-                });
+                } else {
+                    console.log('User authenticated, showing dashboard');
+                    document.getElementById('loadingMessage').style.display = 'none';
+                    document.getElementById('main-content').style.display = 'block';
+                }
+            }, (error) => {
+                console.error('Error in onAuthStateChanged:', error);
+                document.getElementById('loadingMessage').innerHTML = 'Error loading page: ' + error.message;
             });
 
-            const toggleDarkMode = document.getElementById('toggleDarkMode');
-            const toggleLanguage = document.getElementById('toggleLanguage');
-            const htmlRoot = document.getElementById('htmlRoot');
+            document.addEventListener('DOMContentLoaded', () => {
+                let currentLang = localStorage.getItem('language') || 'ar';
 
-            if (toggleDarkMode) {
-                const isDark = localStorage.getItem('darkMode') === 'true';
-                if (isDark) {
-                    document.body.classList.add('dark-mode');
-                    toggleDarkMode.innerHTML = '<i class="fas fa-sun"></i>';
-                } else {
-                    toggleDarkMode.innerHTML = '<i class="fas fa-moon"></i>';
+                function toggleSidebar() {
+                    const sidebar = document.getElementById('sidebar');
+                    const overlay = document.getElementById('overlay');
+                    sidebar.classList.toggle('sidebar-hidden');
+                    overlay.classList.toggle('hidden');
                 }
 
-                toggleDarkMode.addEventListener('click', () => {
-                    document.body.classList.toggle('dark-mode');
-                    const isDark = document.body.classList.contains('dark-mode');
-                    toggleDarkMode.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-                    localStorage.setItem('darkMode', isDark);
-                    updateTextContent();
+                function toggleDetails(detailId) {
+                    const details = document.getElementById(detailId);
+                    details.style.display = details.style.display === 'block' ? 'none' : 'block';
+                }
+
+                document.getElementById('signOutBtn').addEventListener('click', () => {
+                    auth.signOut().then(() => {
+                        console.log('User signed out successfully');
+                        window.location.href = 'index.html';
+                    }).catch(error => {
+                        console.error('Error signing out:', error);
+                    });
                 });
-            }
 
-            if (toggleLanguage) {
-                htmlRoot.setAttribute('lang', currentLang);
-                htmlRoot.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
-                toggleLanguage.textContent = currentLang === 'ar' ? 'EN' : 'AR';
-                updateTextContent();
+                const toggleDarkMode = document.getElementById('toggleDarkMode');
+                const toggleLanguage = document.getElementById('toggleLanguage');
+                const htmlRoot = document.getElementById('htmlRoot');
 
-                toggleLanguage.addEventListener('click', () => {
-                    currentLang = currentLang === 'ar' ? 'en' : 'ar';
+                if (toggleDarkMode) {
+                    const isDark = localStorage.getItem('darkMode') === 'true';
+                    if (isDark) {
+                        document.body.classList.add('dark-mode');
+                        toggleDarkMode.innerHTML = '<i class="fas fa-sun"></i>';
+                    } else {
+                        toggleDarkMode.innerHTML = '<i class="fas fa-moon"></i>';
+                    }
+
+                    toggleDarkMode.addEventListener('click', () => {
+                        document.body.classList.toggle('dark-mode');
+                        const isDark = document.body.classList.contains('dark-mode');
+                        toggleDarkMode.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+                        localStorage.setItem('darkMode', isDark);
+                        updateTextContent();
+                    });
+                }
+
+                if (toggleLanguage) {
                     htmlRoot.setAttribute('lang', currentLang);
                     htmlRoot.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
                     toggleLanguage.textContent = currentLang === 'ar' ? 'EN' : 'AR';
-                    localStorage.setItem('language', currentLang);
                     updateTextContent();
-                });
-            }
 
-            function updateTextContent() {
-                document.querySelectorAll('[data-ar][data-en]').forEach(element => {
-                    const text = element.getAttribute(`data-${currentLang}`);
-                    element.textContent = text;
-                });
-            }
-        });
+                    toggleLanguage.addEventListener('click', () => {
+                        currentLang = currentLang === 'ar' ? 'en' : 'ar';
+                        htmlRoot.setAttribute('lang', currentLang);
+                        htmlRoot.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
+                        toggleLanguage.textContent = currentLang === 'ar' ? 'EN' : 'AR';
+                        localStorage.setItem('language', currentLang);
+                        updateTextContent();
+                    });
+                }
+
+                function updateTextContent() {
+                    document.querySelectorAll('[data-ar][data-en]').forEach(element => {
+                        const text = element.getAttribute(`data-${currentLang}`);
+                        element.textContent = text;
+                    });
+                }
+            });
+        } catch (error) {
+            console.error('Error initializing Firebase:', error);
+            document.getElementById('loadingMessage').innerHTML = 'Error initializing Firebase: ' + error.message;
+            document.getElementById('loadingMessage').style.display = 'block';
+        }
     </script>
 </body>
 </html>
