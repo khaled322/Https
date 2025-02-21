@@ -7,6 +7,32 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Cairo:wght@400;700&display=swap" rel="stylesheet"/>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
+    <script>
+        // تهيئة Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCCQRblRXdM9vHYk_vitoMaDihD-YlXwzc",
+            authDomain: "login-5ab63.firebaseapp.com",
+            projectId: "login-5ab63",
+            storageBucket: "login-5ab63.firebasestorage.app",
+            messagingSenderId: "114075832736",
+            appId: "1:114075832736:web:ea26dba6a7250417c594c5",
+            measurementId: "G-W61905Q2Q1"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const googleProvider = new firebase.auth.GoogleAuthProvider();
+
+        // التحقق من حالة تسجيل الدخول
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                window.location.href = 'dashboard.html';
+            }
+        });
+    </script>
     <style>
         body {
             font-family: 'Cairo', 'Roboto', sans-serif;
@@ -230,7 +256,6 @@
         </div>
     </div>
 
-    <script type="module" src="firebase-config.js"></script>
-    <script type="module" src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
