@@ -10,32 +10,34 @@
     <!-- Firebase Modular SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyCCQRblRXdM9vHYk_vitoMaDihD-YlXwzc",
-            authDomain: "login-5ab63.firebaseapp.com",
-            projectId: "login-5ab63",
-            storageBucket: "login-5ab63.firebasestorage.app",
-            messagingSenderId: "114075832736",
-            appId: "1:114075832736:web:ea26dba6a7250417c594c5",
-            measurementId: "G-W61905Q2Q1"
+            apiKey: "YOUR_API_KEY",           // استبدل بـ API Key الخاص بك
+            authDomain: "YOUR_AUTH_DOMAIN",   // استبدل بـ authDomain الخاص بك
+            projectId: "YOUR_PROJECT_ID",     // استبدل بـ projectId الخاص بك
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID",
+            measurementId: "YOUR_MEASUREMENT_ID"
         };
 
-        try {
-            const app = initializeApp(firebaseConfig);
-            const auth = getAuth(app);
-            const googleProvider = new GoogleAuthProvider();
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const googleProvider = new GoogleAuthProvider();
 
-            window.auth = auth;
-            window.signInWithEmailAndPassword = signInWithEmailAndPassword;
-            window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
-            window.signInWithPopup = signInWithPopup;
-            window.googleProvider = googleProvider;
-            console.log("Firebase initialized successfully");
-        } catch (error) {
-            console.error("Error initializing Firebase:", error);
-        }
+        window.auth = auth;
+        window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+        window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+        window.signInWithPopup = signInWithPopup;
+        window.googleProvider = googleProvider;
+
+        // إعادة توجيه إلى Dashboard عند تسجيل الدخول
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.location.href = 'dashboard.html';
+            }
+        });
     </script>
     <style>
         body {
