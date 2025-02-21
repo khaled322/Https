@@ -12,39 +12,39 @@
         body {
             font-family: 'Cairo', 'Poppins', sans-serif;
             transition: all 0.4s ease-in-out;
-            background-color: #ffffff;
-            color: #1a202c;
+            background-color: #f7fafc;
+            color: #2d3748;
         }
         .dark-mode {
-            background-color: #121212;
-            color: #e2e8f0;
+            background-color: #1a1a1a;
+            color: #ffffff;
         }
         .dark-mode .bg-white {
-            background-color: #1e1e1e;
-        }
-        .dark-mode .bg-gray-100 {
             background-color: #2d2d2d;
         }
+        .dark-mode .bg-gray-100 {
+            background-color: #3d3d3d;
+        }
         .dark-mode .text-gray-700 {
-            color: #e2e8f0;
+            color: #ffffff;
         }
         .dark-mode .text-gray-600 {
-            color: #a0aec0;
+            color: #a0a0a0;
         }
         .dark-mode .card {
-            box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
-            background-color: #1e1e1e;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            background-color: #2d2d2d;
         }
         .dark-mode .bg-blue-200, .dark-mode .bg-yellow-200, .dark-mode .bg-red-200, .dark-mode .bg-purple-200,
         .dark-mode .bg-green-200, .dark-mode .bg-orange-200 {
             background-color: #4a5568;
         }
         .dark-mode button:not(.back-btn) {
-            background-color: #ecc94b;
-            color: #1a202c;
+            background-color: #facc15;
+            color: #1a1a1a;
         }
         .dark-mode button:not(.back-btn):hover {
-            background-color: #d69e2e;
+            background-color: #f59e0b;
         }
         .sidebar {
             transition: transform 0.3s ease;
@@ -57,7 +57,7 @@
             z-index: 20;
         }
         .dark-mode .sidebar {
-            background-color: #1e1e1e;
+            background-color: #2d2d2d;
         }
         .sidebar-hidden {
             transform: translateX(100%);
@@ -82,38 +82,21 @@
             transition: background 0.3s ease, transform 0.2s ease;
         }
         button:hover {
-            background: #ecc94b;
+            background: #facc15;
             transform: scale(1.05);
         }
         .sidebar a:hover {
-            background: rgba(236, 201, 75, 0.2);
-        }
-        .back-btn {
-            background: #ef4444;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 9999px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 48px;
-            height: 48px;
-            position: fixed;
-            bottom: 80px;
-            left: 20px;
-            z-index: 30;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            background: rgba(250, 204, 21, 0.2);
         }
         .order-details {
             display: none;
             margin-top: 1rem;
             padding: 1rem;
-            background: #f9fafb;
+            background: #edf2f7;
             border-radius: 8px;
         }
         .dark-mode .order-details {
-            background: #2d2d2d;
+            background: #3d3d3d;
         }
         .top-bar {
             background-color: #ffffff;
@@ -129,7 +112,7 @@
             z-index: 10;
         }
         .dark-mode .top-bar {
-            background-color: #1e1e1e;
+            background-color: #2d2d2d;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
         }
         .top-bar .icons {
@@ -148,10 +131,10 @@
             transition: color 0.3s ease;
         }
         .dark-mode .top-bar i {
-            color: #e2e8f0;
+            color: #a0a0a0;
         }
         .top-bar i:hover {
-            color: #ecc94b;
+            color: #facc15;
         }
     </style>
 </head>
