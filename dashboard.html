@@ -8,31 +8,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Cairo:wght@400;700&display=swap" rel="stylesheet"/>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
-    <script>
-        // تهيئة Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyCCQRblRXdM9vHYk_vitoMaDihD-YlXwzc",
-            authDomain: "login-5ab63.firebaseapp.com",
-            projectId: "login-5ab63",
-            storageBucket: "login-5ab63.firebasestorage.app",
-            messagingSenderId: "114075832736",
-            appId: "1:114075832736:web:ea26dba6a7250417c594c5",
-            measurementId: "G-W61905Q2Q1"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-
-        // التحقق من حالة تسجيل الدخول
-        auth.onAuthStateChanged(user => {
-            if (!user) {
-                window.location.href = 'index.html';
-            }
-        });
-    </script>
     <style>
         body {
             font-family: 'Cairo', 'Poppins', sans-serif;
@@ -195,7 +170,7 @@
             <li><a class="flex items-center space-x-2 hover:bg-gray-200 p-2 rounded-lg transition" href="balance.html"><i class="fas fa-wallet text-lg"></i><span data-ar="الرصيد" data-en="Balance">الرصيد</span></a></li>
             <li><a class="flex items-center space-x-2 hover:bg-gray-200 p-2 rounded-lg transition" href="notifications.html"><i class="fas fa-bell text-lg"></i><span data-ar="الإشعارات" data-en="Notifications">الإشعارات</span></a></li>
             <li><a class="flex items-center space-x-2 hover:bg-gray-200 p-2 rounded-lg transition" href="settings.html"><i class="fas fa-cog text-lg"></i><span data-ar="الإعدادات" data-en="Settings">الإعدادات</span></a></li>
-            <li><a class="flex items-center space-x-2 hover:bg-gray-200 p-2 rounded-lg transition" href="#" onclick="signOut()"><i class="fas fa-sign-out-alt text-lg"></i><span data-ar="تسجيل الخروج" data-en="Sign Out">تسجيل الخروج</span></a></li>
+            <li><a class="flex items-center space-x-2 hover:bg-gray-200 p-2 rounded-lg transition" href="#" id="signOutBtn"><i class="fas fa-sign-out-alt text-lg"></i><span data-ar="تسجيل الخروج" data-en="Sign Out">تسجيل الخروج</span></a></li>
         </ul>
     </div>
     <!-- Overlay -->
@@ -324,73 +299,101 @@
         <i class="fas fa-cog text-2xl text-gray-700 cursor-pointer" onclick="window.location.href='settings.html'"></i>
     </div>
 
-    <script>
-        let currentLang = localStorage.getItem('language') || 'ar';
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
-            sidebar.classList.toggle('sidebar-hidden');
-            overlay.classList.toggle('hidden');
-        }
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCCQRblRXdM9vHYk_vitoMaDihD-YlXwzc",
+            authDomain: "login-5ab63.firebaseapp.com",
+            projectId: "login-5ab63",
+            storageBucket: "login-5ab63.firebasestorage.app",
+            messagingSenderId: "114075832736",
+            appId: "1:114075832736:web:ea26dba6a7250417c594c5",
+            measurementId: "G-W61905Q2Q1"
+        };
 
-        function toggleDetails(detailId) {
-            const details = document.getElementById(detailId);
-            details.style.display = details.style.display === 'block' ? 'none' : 'block';
-        }
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
 
-        function signOut() {
-            auth.signOut().then(() => {
+        // التحقق من حالة تسجيل الدخول
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
                 window.location.href = 'index.html';
-            }).catch(error => {
-                console.error('Error signing out:', error);
-            });
-        }
+            }
+        });
 
-        const toggleDarkMode = document.getElementById('toggleDarkMode');
-        const toggleLanguage = document.getElementById('toggleLanguage');
-        const htmlRoot = document.getElementById('htmlRoot');
+        document.addEventListener('DOMContentLoaded', () => {
+            let currentLang = localStorage.getItem('language') || 'ar';
 
-        if (toggleDarkMode) {
-            const isDark = localStorage.getItem('darkMode') === 'true';
-            if (isDark) {
-                document.body.classList.add('dark-mode');
-                toggleDarkMode.innerHTML = '<i class="fas fa-sun"></i>';
-            } else {
-                toggleDarkMode.innerHTML = '<i class="fas fa-moon"></i>';
+            function toggleSidebar() {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('overlay');
+                sidebar.classList.toggle('sidebar-hidden');
+                overlay.classList.toggle('hidden');
             }
 
-            toggleDarkMode.addEventListener('click', () => {
-                document.body.classList.toggle('dark-mode');
-                const isDark = document.body.classList.contains('dark-mode');
-                toggleDarkMode.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-                localStorage.setItem('darkMode', isDark);
-                updateTextContent();
+            function toggleDetails(detailId) {
+                const details = document.getElementById(detailId);
+                details.style.display = details.style.display === 'block' ? 'none' : 'block';
+            }
+
+            document.getElementById('signOutBtn').addEventListener('click', () => {
+                auth.signOut().then(() => {
+                    window.location.href = 'index.html';
+                }).catch(error => {
+                    console.error('Error signing out:', error);
+                });
             });
-        }
 
-        if (toggleLanguage) {
-            htmlRoot.setAttribute('lang', currentLang);
-            htmlRoot.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
-            toggleLanguage.textContent = currentLang === 'ar' ? 'EN' : 'AR';
-            updateTextContent();
+            const toggleDarkMode = document.getElementById('toggleDarkMode');
+            const toggleLanguage = document.getElementById('toggleLanguage');
+            const htmlRoot = document.getElementById('htmlRoot');
 
-            toggleLanguage.addEventListener('click', () => {
-                currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            if (toggleDarkMode) {
+                const isDark = localStorage.getItem('darkMode') === 'true';
+                if (isDark) {
+                    document.body.classList.add('dark-mode');
+                    toggleDarkMode.innerHTML = '<i class="fas fa-sun"></i>';
+                } else {
+                    toggleDarkMode.innerHTML = '<i class="fas fa-moon"></i>';
+                }
+
+                toggleDarkMode.addEventListener('click', () => {
+                    document.body.classList.toggle('dark-mode');
+                    const isDark = document.body.classList.contains('dark-mode');
+                    toggleDarkMode.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+                    localStorage.setItem('darkMode', isDark);
+                    updateTextContent();
+                });
+            }
+
+            if (toggleLanguage) {
                 htmlRoot.setAttribute('lang', currentLang);
                 htmlRoot.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
                 toggleLanguage.textContent = currentLang === 'ar' ? 'EN' : 'AR';
-                localStorage.setItem('language', currentLang);
                 updateTextContent();
-            });
-        }
 
-        function updateTextContent() {
-            document.querySelectorAll('[data-ar][data-en]').forEach(element => {
-                const text = element.getAttribute(`data-${currentLang}`);
-                element.textContent = text;
-            });
-        }
+                toggleLanguage.addEventListener('click', () => {
+                    currentLang = currentLang === 'ar' ? 'en' : 'ar';
+                    htmlRoot.setAttribute('lang', currentLang);
+                    htmlRoot.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
+                    toggleLanguage.textContent = currentLang === 'ar' ? 'EN' : 'AR';
+                    localStorage.setItem('language', currentLang);
+                    updateTextContent();
+                });
+            }
+
+            function updateTextContent() {
+                document.querySelectorAll('[data-ar][data-en]').forEach(element => {
+                    const text = element.getAttribute(`data-${currentLang}`);
+                    element.textContent = text;
+                });
+            }
+        });
     </script>
 </body>
 </html>
