@@ -1,7 +1,8 @@
 // script.js
-import { auth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, googleProvider, onAuthStateChanged } from './firebase-config.js';
-
 document.addEventListener('DOMContentLoaded', () => {
+    const auth = firebase.auth();
+    const googleProvider = new firebase.auth.GoogleAuthProvider();
+
     const togglePassword = document.querySelector('#togglePassword');
     const password = document.querySelector('#password');
     const toggleRegisterPassword = document.querySelector('#toggleRegisterPassword');
@@ -22,13 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const htmlRoot = document.querySelector('#htmlRoot');
     const googleSignIn = document.querySelector('#googleSignIn');
     const googleSignUp = document.querySelector('#googleSignUp');
-
-    // التحقق من حالة تسجيل الدخول عند التحميل
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            window.location.href = 'dashboard.html'; // إعادة توجيه إلى Dashboard إذا كان مسجلًا
-        }
-    });
 
     function togglePasswordVisibility(input, toggle) {
         if (input && toggle) {
@@ -86,9 +80,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
                 console.log('تم تسجيل الدخول بنجاح:', userCredential.user);
-                window.location.href = 'dashboard.html'; // إعادة توجيه إلى Dashboard
+                window.location.href = 'dashboard.html';
             } catch (error) {
                 loginError.classList.remove('hidden');
                 loginError.textContent = currentLang === 'ar' ? 
@@ -132,9 +126,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
                 console.log('تم إنشاء الحساب بنجاح:', userCredential.user);
-                window.location.href = 'dashboard.html'; // إعادة توجيه إلى Dashboard
+                window.location.href = 'dashboard.html';
             } catch (error) {
                 registerError.classList.remove('hidden');
                 registerError.textContent = currentLang === 'ar' ? 
@@ -155,9 +149,9 @@ document.addEventListener('DOMContentLoaded', () => {
             button.querySelector('span').textContent = currentLang === 'ar' ? 'جارٍ التحميل...' : 'Loading...';
 
             try {
-                const result = await signInWithPopup(auth, googleProvider);
+                const result = await auth.signInWithPopup(googleProvider);
                 console.log(`${actionText} باستخدام Google:`, result.user);
-                window.location.href = 'dashboard.html'; // إعادة توجيه إلى Dashboard
+                window.location.href = 'dashboard.html';
             } catch (error) {
                 errorElement.classList.remove('hidden');
                 errorElement.textContent = currentLang === 'ar' ?
