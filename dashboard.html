@@ -1,16 +1,41 @@
-<?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl" id="htmlRoot">
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title data-ar="لوحة التحكم - تاجر هيلب" data-en="Mobile Dashboard - Tadjir Help">لوحة التحكم - تاجر هيلب</title>
+    <title data-ar="تسجيل الدخول - تاجر هيلب" data-en="Login - Tadjir Help">تسجيل الدخول - تاجر هيلب</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Cairo:wght@400;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Cairo:wght@400;700&display=swap" rel="stylesheet"/>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
+    <script>
+        // تهيئة Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCCQRblRXdM9vHYk_vitoMaDihD-YlXwzc",
+            authDomain: "login-5ab63.firebaseapp.com",
+            projectId: "login-5ab63",
+            storageBucket: "login-5ab63.firebasestorage.app",
+            messagingSenderId: "114075832736",
+            appId: "1:114075832736:web:ea26dba6a7250417c594c5",
+            measurementId: "G-W61905Q2Q1"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const googleProvider = new firebase.auth.GoogleAuthProvider();
+
+        // التحقق من حالة تسجيل الدخول
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                window.location.href = 'dashboard.html';
+            }
+        });
+    </script>
     <style>
         body {
-            font-family: 'Cairo', 'Poppins', sans-serif;
+            font-family: 'Cairo', 'Roboto', sans-serif;
             transition: all 0.4s ease-in-out;
             background-color: #ffffff;
             color: #1a202c;
@@ -19,355 +44,218 @@
             background-color: #121212;
             color: #e2e8f0;
         }
-        .dark-mode .bg-white {
+        .dark-mode #loginForm, .dark-mode #registerForm {
             background-color: #1e1e1e;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
-        .dark-mode .bg-gray-100 {
+        .dark-mode input {
             background-color: #2d2d2d;
-        }
-        .dark-mode .text-gray-700 {
             color: #e2e8f0;
+            border-color: #4a5568;
+        }
+        .dark-mode input:focus {
+            border-color: #ecc94b;
+            ring-color: #ecc94b;
+        }
+        .dark-mode button:not(.google-btn) {
+            background-color: #ecc94b;
+            color: #1a202c;
+        }
+        .dark-mode button:not(.google-btn):hover {
+            background-color: #d69e2e;
+        }
+        .dark-mode .google-btn {
+            background-color: #ffffff;
+            color: #1a202c;
+            border-color: #4a5568;
+        }
+        .dark-mode .google-btn:hover {
+            background-color: #f7fafc;
+        }
+        .dark-mode a {
+            color: #ecc94b;
         }
         .dark-mode .text-gray-600 {
             color: #a0aec0;
         }
-        .dark-mode .card {
-            box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
-            background-color: #1e1e1e;
+        .input-field, .input-field-no-icon {
+            position: relative;
+            width: 100%;
         }
-        .dark-mode .bg-blue-200, .dark-mode .bg-yellow-200, .dark-mode .bg-red-200, .dark-mode .bg-purple-200,
-        .dark-mode .bg-green-200, .dark-mode .bg-orange-200 {
-            background-color: #4a5568;
+        .input-field input, .input-field-no-icon input {
+            padding: 0.75rem 1rem;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 1rem;
+            line-height: 1.5;
+            transition: all 0.3s ease;
         }
-        .dark-mode button:not(.back-btn) {
+        .input-field input {
+            padding-left: 2.25rem;
+            padding-right: 1rem;
+        }
+        .input-field input:focus {
+            transform: scale(1.02);
+            border-color: #ecc94b;
+            box-shadow: 0 0 5px rgba(236, 201, 75, 0.5);
+        }
+        .input-field i {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: color 0.3s ease;
+        }
+        .input-field i:hover {
+            color: #ecc94b;
+        }
+        [dir="rtl"] .input-field i {
+            left: 0.75rem;
+        }
+        [dir="ltr"] .input-field i {
+            right: 0.75rem;
+        }
+        .btn, .google-btn {
+            transition: all 0.3s ease;
+        }
+        .btn:hover, .google-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+        .btn:active, .google-btn:active {
+            transform: scale(0.98);
+        }
+        .form-container {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: slideIn 0.5s ease forwards;
+        }
+        .hidden {
+            display: none;
+        }
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .title-highlight {
+            display: inline-block;
+        }
+        #toggleDarkMode, #toggleLanguage {
+            transition: background-color 0.3s ease;
+        }
+        #toggleDarkMode:hover, #toggleLanguage:hover {
             background-color: #ecc94b;
             color: #1a202c;
         }
-        .dark-mode button:not(.back-btn):hover {
-            background-color: #d69e2e;
-        }
-        .sidebar {
-            transition: transform 0.3s ease;
-            background-color: #ffffff;
-            position: fixed;
-            top: 0;
-            bottom: 0;
-            width: 16rem;
-            padding: 1rem;
-            z-index: 20;
-        }
-        .dark-mode .sidebar {
-            background-color: #1e1e1e;
-        }
-        .sidebar-hidden {
-            transform: translateX(100%);
-        }
-        [dir="ltr"] .sidebar {
-            left: 0;
-        }
-        [dir="rtl"] .sidebar {
-            right: 0;
-        }
-        [dir="ltr"] .sidebar-hidden {
-            transform: translateX(-100%);
-        }
-        .card {
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s ease;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-        }
-        button {
-            transition: background 0.3s ease, transform 0.2s ease;
-        }
-        button:hover {
-            background: #ecc94b;
-            transform: scale(1.05);
-        }
-        .sidebar a:hover {
-            background: rgba(236, 201, 75, 0.2);
-        }
-        .back-btn {
-            background: #ef4444;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 9999px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 48px;
-            height: 48px;
-            position: fixed;
-            bottom: 80px;
-            left: 20px;
-            z-index: 30;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
-        .order-details {
-            display: none;
-            margin-top: 1rem;
-            padding: 1rem;
-            background: #f9fafb;
-            border-radius: 8px;
-        }
-        .dark-mode .order-details {
-            background: #2d2d2d;
-        }
-        .top-bar {
-            background-color: #ffffff;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 10;
-        }
-        .dark-mode .top-bar {
-            background-color: #1e1e1e;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-        }
-        .top-bar .icons {
-            display: flex;
-            gap: 1.5rem;
-        }
-        .top-bar .controls {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-        .top-bar i {
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #4a5568;
-            transition: color 0.3s ease;
-        }
-        .dark-mode .top-bar i {
-            color: #e2e8f0;
-        }
-        .top-bar i:hover {
-            color: #ecc94b;
-        }
     </style>
 </head>
-<body class="bg-gray-100">
-    <!-- Sidebar -->
-    <div class="sidebar bg-white shadow-md sidebar-hidden" id="sidebar">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-bold" data-ar="القائمة" data-en="Menu">القائمة</h2>
-            <button class="text-xl" onclick="toggleSidebar()">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <ul class="space-y-4">
-            <li><a class="flex items-center space-x-2 hover:bg-gray-200 p-2 rounded-lg transition" href="dashboard.html"><i class="fas fa-home text-lg"></i><span data-ar="الرئيسية" data-en="Home">الرئيسية</span></a></li>
-            <li><a class="flex items-center space-x-2 hover:bg-gray-200 p-2 rounded-lg transition" href="orders.html"><i class="fas fa-clipboard-list text-lg"></i><span data-ar="الطلبات" data-en="Orders">الطلبات</span></a></li>
-            <li><a class="flex items-center space-x-2 hover:bg-gray-200 p-2 rounded-lg transition" href="balance.html"><i class="fas fa-wallet text-lg"></i><span data-ar="الرصيد" data-en="Balance">الرصيد</span></a></li>
-            <li><a class="flex items-center space-x-2 hover:bg-gray-200 p-2 rounded-lg transition" href="notifications.html"><i class="fas fa-bell text-lg"></i><span data-ar="الإشعارات" data-en="Notifications">الإشعارات</span></a></li>
-            <li><a class="flex items-center space-x-2 hover:bg-gray-200 p-2 rounded-lg transition" href="settings.html"><i class="fas fa-cog text-lg"></i><span data-ar="الإعدادات" data-en="Settings">الإعدادات</span></a></li>
-            <li><a class="flex items-center space-x-2 hover:bg-gray-200 p-2 rounded-lg transition" href="#" onclick="signOut()"><i class="fas fa-sign-out-alt text-lg"></i><span data-ar="تسجيل الخروج" data-en="Sign Out">تسجيل الخروج</span></a></li>
-        </ul>
-    </div>
-    <!-- Overlay -->
-    <div class="fixed inset-0 bg-black opacity-50 hidden z-10" id="overlay" onclick="toggleSidebar()"></div>
-    <!-- Top Bar -->
-    <div class="top-bar">
-        <button class="text-xl" onclick="toggleSidebar()">
-            <i class="fas fa-bars"></i>
+<body class="flex items-center justify-center min-h-screen">
+    <div class="fixed top-4 left-4 flex space-x-4">
+        <button id="toggleDarkMode" class="bg-gray-200 px-3 py-1 rounded-md dark:bg-gray-700" aria-label="تبديل الوضع الداكن">
+            <i class="fas fa-moon"></i>
         </button>
-        <div class="icons">
-            <i class="fas fa-search" onclick="window.location.href='search.html'"></i>
-            <i class="fas fa-user" onclick="window.location.href='profile.html'"></i>
+        <button id="toggleLanguage" class="bg-gray-200 px-3 py-1 rounded-md dark:bg-gray-700" aria-label="تغيير اللغة">EN</button>
+    </div>
+
+    <div id="loginForm" class="form-container w-full max-w-md mx-auto p-6 bg-gray-50 rounded-lg shadow-md">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold">
+                <span data-ar="تاجر" data-en="Tadjir">تاجر</span>
+                <span class="text-yellow-500 title-highlight" data-ar="هيلب" data-en="Help">هيلب</span>
+            </h2>
+            <p class="text-gray-600 mt-2" data-ar="سجل الدخول إلى حسابك" data-en="Log in to your account">سجل الدخول إلى حسابك</p>
         </div>
-        <div class="controls">
-            <button id="toggleDarkMode" aria-label="تبديل الوضع الداكن">
-                <i class="fas fa-moon"></i>
+        <form id="loginFormSubmit" class="space-y-6">
+            <div class="input-field-no-icon">
+                <input class="border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
+                       placeholder="أدخل البريد الإلكتروني" data-ar="أدخل البريد الإلكتروني" data-en="Enter email" 
+                       type="email" id="loginEmail" required/>
+            </div>
+            <div class="input-field">
+                <input class="border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
+                       id="password" placeholder="أدخل كلمة المرور" data-ar="أدخل كلمة المرور" data-en="Enter password" 
+                       type="password" required/>
+                <i class="fas fa-eye" id="togglePassword"></i>
+            </div>
+            <div class="text-left">
+                <a class="text-sm text-gray-600 hover:underline" href="forgot-password.html" data-ar="نسيت كلمة المرور؟" data-en="Forgot Password?">نسيت كلمة المرور؟</a>
+            </div>
+            <p id="loginError" class="text-red-500 text-sm hidden"></p>
+            <button class="btn w-full bg-yellow-500 text-white py-3 rounded-md font-bold hover:bg-yellow-600" 
+                    type="submit" data-ar="تسجيل الدخول" data-en="Login">تسجيل الدخول</button>
+        </form>
+        <div class="mt-6">
+            <button id="googleSignIn" class="google-btn w-full bg-white border border-gray-300 text-gray-700 py-3 rounded-md font-bold flex items-center justify-center space-x-2">
+                <svg class="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-1.02.68-2.31 1.08-3.71 1.08-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C4 20.36 7.9 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.9 1 4 3.64 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                <span data-ar="تسجيل الدخول عبر Google" data-en="Sign in with Google">تسجيل الدخول عبر Google</span>
             </button>
-            <button id="toggleLanguage" class="text-sm font-bold px-2 py-1 rounded-md bg-yellow-300 text-gray-900">EN</button>
+        </div>
+        <div class="text-center mt-6">
+            <p class="text-sm text-gray-600">
+                <span data-ar="ليس لديك حساب؟" data-en="Don't have an account?">ليس لديك حساب؟</span>
+                <a class="text-yellow-500 font-bold cursor-pointer hover:underline" id="showRegisterForm" data-ar="إنشاء حساب" data-en="Create Account">إنشاء حساب</a>
+            </p>
         </div>
     </div>
-    <!-- Main Content -->
-    <div class="pt-20 p-4 pb-20" id="main-content">
-        <h2 class="text-xl font-bold mb-2" data-ar="إحصائيات سريعة" data-en="Quick Stats">إحصائيات سريعة</h2>
-        <div class="grid grid-cols-2 gap-4">
-            <div class="card bg-blue-200 p-4 rounded-lg flex items-center cursor-pointer" onclick="window.location.href='completed-orders.html'">
-                <i class="fas fa-check-circle text-4xl text-green-500 mr-4"></i>
-                <div>
-                    <h3 class="font-bold" data-ar="الطلبات المكتملة" data-en="Completed Orders">الطلبات المكتملة</h3>
-                    <p class="text-2xl font-bold text-center">150</p>
-                </div>
-            </div>
-            <div class="card bg-yellow-200 p-4 rounded-lg flex items-center cursor-pointer" onclick="window.location.href='pending-orders.html'">
-                <i class="fas fa-hourglass-half text-4xl text-yellow-500 mr-4"></i>
-                <div>
-                    <h3 class="font-bold" data-ar="الطلبات المعلقة" data-en="Pending Orders">الطلبات المعلقة</h3>
-                    <p class="text-2xl font-bold text-center">30</p>
-                </div>
-            </div>
-            <div class="card bg-red-200 p-4 rounded-lg flex items-center cursor-pointer" onclick="window.location.href='amount-spent.html'">
-                <i class="fas fa-dollar-sign text-4xl text-red-500 mr-4"></i>
-                <div>
-                    <h3 class="font-bold" data-ar="المبلغ المصروف" data-en="Amount Spent">المبلغ المصروف</h3>
-                    <p class="text-2xl font-bold text-center">$4500</p>
-                </div>
-            </div>
-            <div class="card bg-purple-200 p-4 rounded-lg flex items-center cursor-pointer" onclick="window.location.href='current-balance.html'">
-                <i class="fas fa-wallet text-4xl text-blue-500 mr-4"></i>
-                <div>
-                    <h3 class="font-bold" data-ar="الرصيد الحالي" data-en="Current Balance">الرصيد الحالي</h3>
-                    <p class="text-2xl font-bold text-center">$2500</p>
-                </div>
-            </div>
+
+    <div id="registerForm" class="form-container w-full max-w-md mx-auto p-6 bg-gray-50 rounded-lg shadow-md hidden">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold">
+                <span data-ar="تاجر" data-en="Tadjir">تاجر</span>
+                <span class="text-yellow-500 title-highlight" data-ar="هيلب" data-en="Help">هيلب</span>
+            </h2>
+            <p class="text-gray-600 mt-2" data-ar="أنشئ حسابك الجديد" data-en="Create your new account">أنشئ حسابك الجديد</p>
         </div>
-        <h2 class="text-xl font-bold mt-8 mb-2" data-ar="خدماتنا" data-en="Our Services">خدماتنا</h2>
-        <div class="grid grid-cols-2 gap-4">
-            <div class="card bg-green-200 p-4 rounded-lg flex items-center cursor-pointer" onclick="window.location.href='sell-courses.html'">
-                <i class="fas fa-book text-4xl text-green-500 mr-4"></i>
-                <div>
-                    <h3 class="font-bold" data-ar="بيع الدورات" data-en="Sell Courses">بيع الدورات</h3>
-                    <p class="text-center" data-ar="ابدأ ببيع دوراتك اليوم!" data-en="Start selling your courses today!">ابدأ ببيع دوراتك اليوم!</p>
-                </div>
+        <form id="registrationForm" class="space-y-6">
+            <div class="input-field-no-icon">
+                <input class="border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
+                       placeholder="الاسم الأول" data-ar="الاسم الأول" data-en="First Name" 
+                       type="text" id="firstName" required/>
             </div>
-            <div class="card bg-orange-200 p-4 rounded-lg flex items-center cursor-pointer" onclick="window.location.href='sell-ad-accounts.html'">
-                <i class="fas fa-ad text-4xl text-orange-500 mr-4"></i>
-                <div>
-                    <h3 class="font-bold" data-ar="بيع حسابات الإعلانات" data-en="Sell Ad Accounts">بيع حسابات الإعلانات</h3>
-                    <p class="text-center" data-ar="استثمر حسابات الإعلانات بسهولة" data-en="Monetize your ad accounts easily">استثمر حسابات الإعلانات بسهولة</p>
-                </div>
+            <div class="input-field-no-icon">
+                <input class="border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
+                       placeholder="اسم العائلة" data-ar="اسم العائلة" data-en="Last Name" 
+                       type="text" id="lastName" required/>
             </div>
-            <div class="card bg-blue-200 p-4 rounded-lg flex items-center cursor-pointer" onclick="window.location.href='create-ad-campaigns.html'">
-                <i class="fas fa-bullhorn text-4xl text-blue-500 mr-4"></i>
-                <div>
-                    <h3 class="font-bold" data-ar="إنشاء حملات إعلانية" data-en="Create Ad Campaigns">إنشاء حملات إعلانية</h3>
-                    <p class="text-center" data-ar="أطلق حملات إعلانية فعالة" data-en="Launch effective ad campaigns">أطلق حملات إعلانية فعالة</p>
-                </div>
+            <div class="input-field-no-icon">
+                <input class="border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
+                       placeholder="أدخل البريد الإلكتروني" data-ar="أدخل البريد الإلكتروني" data-en="Enter email" 
+                       type="email" id="registerEmail" required/>
             </div>
-            <div class="card bg-purple-200 p-4 rounded-lg flex items-center cursor-pointer" onclick="window.location.href='issue-visa-cards.html'">
-                <i class="fas fa-credit-card text-4xl text-purple-500 mr-4"></i>
-                <div>
-                    <h3 class="font-bold" data-ar="إصدار بطاقات فيزا" data-en="Issue Visa Cards">إصدار بطاقات فيزا</h3>
-                    <p class="text-center" data-ar="احصل على بطاقات فيزا بسرعة" data-en="Get your Visa cards issued quickly">احصل على بطاقات فيزا بسرعة</p>
-                </div>
+            <div class="input-field">
+                <input class="border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
+                       id="registerPassword" placeholder="أدخل كلمة المرور" data-ar="أدخل كلمة المرور" data-en="Enter password" 
+                       type="password" required/>
+                <i class="fas fa-eye" id="toggleRegisterPassword"></i>
             </div>
+            <div class="input-field">
+                <input class="border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
+                       id="confirmPassword" placeholder="تأكيد كلمة المرور" data-ar="تأكيد كلمة المرور" data-en="Confirm password" 
+                       type="password" required/>
+                <i class="fas fa-eye" id="toggleConfirmPassword"></i>
+            </div>
+            <p id="passwordError" class="text-red-500 text-sm hidden" data-ar="كلمات المرور غير متطابقة!" data-en="Passwords do not match!">كلمات المرور غير متطابقة!</p>
+            <p id="registerError" class="text-red-500 text-sm hidden"></p>
+            <button class="btn w-full bg-yellow-500 text-white py-3 rounded-md font-bold hover:bg-yellow-600" 
+                    type="submit" data-ar="تسجيل" data-en="Register">تسجيل</button>
+        </form>
+        <div class="mt-6">
+            <button id="googleSignUp" class="google-btn w-full bg-white border border-gray-300 text-gray-700 py-3 rounded-md font-bold flex items-center justify-center space-x-2">
+                <svg class="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-1.02.68-2.31 1.08-3.71 1.08-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C4 20.36 7.9 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.9 1 4 3.64 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                <span data-ar="التسجيل عبر Google" data-en="Sign up with Google">التسجيل عبر Google</span>
+            </button>
         </div>
-        <h2 class="text-xl font-bold mt-8 mb-2" data-ar="الطلبات الأخيرة" data-en="Recent Orders">الطلبات الأخيرة</h2>
-        <div class="space-y-4">
-            <div class="card bg-white p-4 rounded-lg cursor-pointer" onclick="toggleDetails('order-1234')">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h3 class="font-bold" data-ar="طلب #1234" data-en="Order #1234">طلب #1234</h3>
-                        <p data-ar="بيع الدورات - $100" data-en="Sell Courses - $100">بيع الدورات - $100</p>
-                    </div>
-                    <span class="text-green-500 font-bold" data-ar="مكتمل" data-en="Completed">مكتمل</span>
-                </div>
-                <div id="order-1234" class="order-details">
-                    <p><strong data-ar="التاريخ" data-en="Date">التاريخ:</strong> 2023-10-01</p>
-                    <p><strong data-ar="العميل" data-en="Customer">العميل:</strong> Jane Smith</p>
-                    <p><strong data-ar="طريقة الدفع" data-en="Payment Method">طريقة الدفع:</strong> Credit Card</p>
-                    <p><strong data-ar="التفاصيل" data-en="Details">التفاصيل:</strong> <span data-ar="اشتراك دورة لمدة 6 أشهر" data-en="Course subscription for 6 months">اشتراك دورة لمدة 6 أشهر</span></p>
-                </div>
-            </div>
-            <div class="card bg-white p-4 rounded-lg cursor-pointer" onclick="toggleDetails('order-1235')">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h3 class="font-bold" data-ar="طلب #1235" data-en="Order #1235">طلب #1235</h3>
-                        <p data-ar="بيع حسابات الإعلانات - $150" data-en="Sell Ad Accounts - $150">بيع حسابات الإعلانات - $150</p>
-                    </div>
-                    <span class="text-yellow-500 font-bold" data-ar="معلق" data-en="Pending">معلق</span>
-                </div>
-                <div id="order-1235" class="order-details">
-                    <p><strong data-ar="التاريخ" data-en="Date">التاريخ:</strong> 2023-10-02</p>
-                    <p><strong data-ar="العميل" data-en="Customer">العميل:</strong> John Doe</p>
-                    <p><strong data-ar="طريقة الدفع" data-en="Payment Method">طريقة الدفع:</strong> PayPal</p>
-                    <p><strong data-ar="التفاصيل" data-en="Details">التفاصيل:</strong> <span data-ar="إعداد حساب إعلاني معلق للموافقة" data-en="Ad account setup pending approval">إعداد حساب إعلاني معلق للموافقة</span></p>
-                </div>
-            </div>
+        <div class="text-center mt-6">
+            <p class="text-sm text-gray-600">
+                <span data-ar="لديك حساب بالفعل؟" data-en="Already have an account?">لديك حساب بالفعل؟</span>
+                <a class="text-yellow-500 font-bold cursor-pointer hover:underline" id="showLoginForm" data-ar="تسجيل الدخول" data-en="Login">تسجيل الدخول</a>
+            </p>
         </div>
-        <button class="mt-4 bg-yellow-500 text-white font-bold py-2 px-4 rounded w-full" onclick="window.location.href='orders.html'" data-ar="عرض جميع الطلبات" data-en="View All Orders">عرض جميع الطلبات</button>
-    </div>
-    <!-- Bottom Navigation -->
-    <div class="bg-white shadow-md fixed bottom-0 left-0 right-0 flex justify-around items-center p-4">
-        <i class="fas fa-home text-2xl text-gray-700 cursor-pointer" onclick="window.location.href='dashboard.html'"></i>
-        <i class="fas fa-clipboard-list text-2xl text-gray-700 cursor-pointer" onclick="window.location.href='orders.html'"></i>
-        <i class="fas fa-wallet text-2xl text-gray-700 cursor-pointer" onclick="window.location.href='balance.html'"></i>
-        <i class="fas fa-bell text-2xl text-gray-700 cursor-pointer" onclick="window.location.href='notifications.html'"></i>
-        <i class="fas fa-cog text-2xl text-gray-700 cursor-pointer" onclick="window.location.href='settings.html'"></i>
     </div>
 
-    <script type="module" src="firebase-config.js"></script>
-    <script type="module">
-        import { auth, onAuthStateChanged } from './firebase-config.js';
-
-        let currentLang = localStorage.getItem('language') || 'ar';
-
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
-            sidebar.classList.toggle('sidebar-hidden');
-            overlay.classList.toggle('hidden');
-        }
-
-        function toggleDetails(detailId) {
-            const details = document.getElementById(detailId);
-            details.style.display = details.style.display === 'block' ? 'none' : 'block';
-        }
-
-        function signOut() {
-            auth.signOut().then(() => {
-                window.location.href = 'index.html';
-            }).catch(error => {
-                console.error('Error signing out:', error);
-            });
-        }
-
-        const toggleDarkMode = document.getElementById('toggleDarkMode');
-        const toggleLanguage = document.getElementById('toggleLanguage');
-        const htmlRoot = document.getElementById('htmlRoot');
-
-        if (toggleDarkMode) {
-            const isDark = localStorage.getItem('darkMode') === 'true';
-            if (isDark) {
-                document.body.classList.add('dark-mode');
-                toggleDarkMode.innerHTML = '<i class="fas fa-sun"></i>';
-            } else {
-                toggleDarkMode.innerHTML = '<i class="fas fa-moon"></i>';
-            }
-
-            toggleDarkMode.addEventListener('click', () => {
-                document.body.classList.toggle('dark-mode');
-                const isDark = document.body.classList.contains('dark-mode');
-                toggleDarkMode.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-                localStorage.setItem('darkMode', isDark);
-            });
-        }
-
-        if (toggleLanguage) {
-            htmlRoot.setAttribute('lang', currentLang);
-            htmlRoot.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
-            toggleLanguage.textContent = currentLang === 'ar' ? 'EN' : 'AR';
-            updateTextContent();
-
-            toggleLanguage.addEventListener('click', () => {
-                currentLang = currentLang === 'ar' ? 'en' : 'ar';
-                htmlRoot.setAttribute('lang', currentLang);
-                htmlRoot.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
-                toggleLanguage.textContent = currentLang === 'ar' ? 'EN' : 'AR';
-                localStorage.setItem('language', currentLang);
-                updateTextContent();
-            });
-        }
-
-        function updateTextContent() {
-            document.querySelectorAll('[data-ar][data-en]').forEach(element => {
-                const text = element.getAttribute(`data-${currentLang}`);
-                element.textContent = text;
-            });
-        }
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
