@@ -1,488 +1,424 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" id="htmlRoot">
+<html lang="ar" dir="rtl">
 <head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title data-ar="تسجيل الدخول - تاجر هيلب" data-en="Login - Tadjir Help">تسجيل الدخول - تاجر هيلب</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Cairo:wght@400;700&display=swap" rel="stylesheet"/>
-    <style>
-        body {
-            font-family: 'Cairo', 'Roboto', sans-serif;
-            transition: all 0.4s ease-in-out;
-            background-color: #ffffff;
-            color: #1a202c;
-        }
-        .dark-mode {
-            background-color: #121212;
-            color: #e2e8f0;
-        }
-        .dark-mode #loginForm, .dark-mode #registerForm {
-            background-color: #1e1e1e;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-        .dark-mode input {
-            background-color: #2d2d2d;
-            color: #e2e8f0;
-            border-color: #4a5568;
-        }
-        .dark-mode input:focus {
-            border-color: #ecc94b;
-            ring-color: #ecc94b;
-        }
-        .dark-mode button:not(.google-btn) {
-            background-color: #ecc94b;
-            color: #1a202c;
-        }
-        .dark-mode button:not(.google-btn):hover {
-            background-color: #d69e2e;
-        }
-        .dark-mode .google-btn {
-            background-color: #ffffff;
-            color: #1a202c;
-            border-color: #4a5568;
-        }
-        .dark-mode .google-btn:hover {
-            background-color: #f7fafc;
-        }
-        .dark-mode a {
-            color: #ecc94b;
-        }
-        .dark-mode .text-gray-600 {
-            color: #a0aec0;
-        }
-        .input-field, .input-field-no-icon {
-            position: relative;
-            width: 100%;
-        }
-        .input-field input, .input-field-no-icon input {
-            padding: 0.75rem 1rem;
-            width: 100%;
-            box-sizing: border-box;
-            font-size: 1rem;
-            line-height: 1.5;
-            transition: all 0.3s ease;
-        }
-        .input-field input {
-            padding-left: 2.25rem;
-            padding-right: 1rem;
-        }
-        .input-field input:focus {
-            transform: scale(1.02);
-            border-color: #ecc94b;
-            box-shadow: 0 0 5px rgba(236, 201, 75, 0.5);
-        }
-        .input-field i {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            font-size: 1rem;
-            transition: color 0.3s ease;
-        }
-        .input-field i:hover {
-            color: #ecc94b;
-        }
-        [dir="rtl"] .input-field i {
-            left: 0.75rem;
-        }
-        [dir="ltr"] .input-field i {
-            right: 0.75rem;
-        }
-        .btn, .google-btn {
-            transition: all 0.3s ease;
-        }
-        .btn:hover, .google-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-        }
-        .btn:active, .google-btn:active {
-            transform: scale(0.98);
-        }
-        .form-container {
-            opacity: 0;
-            transform: translateY(20px);
-            animation: slideIn 0.5s ease forwards;
-        }
-        .hidden {
-            display: none;
-        }
-        @keyframes slideIn {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        .title-highlight {
-            display: inline-block;
-        }
-        #toggleDarkMode, #toggleLanguage {
-            transition: background-color 0.3s ease;
-        }
-        #toggleDarkMode:hover, #toggleLanguage:hover {
-            background-color: #ecc94b;
-            color: #1a202c;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>منصة تتبع الطلبيات — إدارة متقدمة</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body { font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial; }
+    .sidebar-backdrop { background: rgba(0,0,0,0.45); }
+    .table-wrap { overflow-x:auto; }
+    /* toast */
+    .toast {
+      position: fixed; left: 50%; transform: translateX(-50%);
+      bottom: 24px; z-index: 60;
+      background: rgba(20,20,20,0.95); color: #fff; padding: 10px 14px; border-radius: 8px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+    }
+  </style>
 </head>
-<body class="flex items-center justify-center min-h-screen">
-    <div class="fixed top-4 left-4 flex space-x-4">
-        <button id="toggleDarkMode" class="bg-gray-200 px-3 py-1 rounded-md dark:bg-gray-700" aria-label="تبديل الوضع الداكن">
-            <i class="fas fa-moon"></i>
-        </button>
-        <button id="toggleLanguage" class="bg-gray-200 px-3 py-1 rounded-md dark:bg-gray-700" aria-label="تغيير اللغة">EN</button>
+<body class="bg-slate-50 min-h-screen">
+
+  <div class="flex">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed inset-y-0 right-0 w-64 bg-white border-l shadow-lg transform translate-x-0 transition-transform duration-200 z-40">
+      <div class="p-4 flex items-center justify-between border-b">
+        <div class="text-lg font-bold">القائمة</div>
+        <button id="closeSidebar" class="md:hidden text-gray-600">✕</button>
+      </div>
+      <nav class="p-4 space-y-2">
+        <button data-page="home" class="w-full text-right px-3 py-2 rounded hover:bg-slate-100 navBtn">🏠 الرئيسية</button>
+        <button data-page="new" class="w-full text-right px-3 py-2 rounded hover:bg-slate-100 navBtn">➕ إضافة إحصاء منتج</button>
+        <button data-page="products" class="w-full text-right px-3 py-2 rounded hover:bg-slate-100 navBtn">🧾 إدارة المنتجات</button>
+        <button data-page="history" class="w-full text-right px-3 py-2 rounded hover:bg-slate-100 navBtn">📦 سجل الأيام</button>
+        <button data-page="stats" class="w-full text-right px-3 py-2 rounded hover:bg-slate-100 navBtn">📈 الإحصاءات</button>
+        <hr class="my-2" />
+        <div>
+          <div class="text-sm text-gray-500 mb-1">الإعدادات السريعة</div>
+          <button id="exportBtn" class="w-full text-right px-3 py-2 rounded hover:bg-slate-100">⬇️ تصدير CSV</button>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Mobile backdrop -->
+    <div id="backdrop" class="hidden fixed inset-0 z-30 md:hidden"></div>
+
+    <!-- Main content -->
+    <div class="flex-1 min-h-screen md:mr-64">
+      <header class="flex items-center justify-between p-4 border-b bg-white">
+        <div class="flex items-center gap-3">
+          <button id="openSidebar" class="md:hidden p-2 bg-slate-100 rounded">☰</button>
+          <h1 class="text-xl font-bold">منصة تتبع الطلبيات — إدارة</h1>
+        </div>
+        <div class="text-sm text-gray-600">Responsive • آمن للعرض المحلي</div>
+      </header>
+
+      <main class="p-4 max-w-6xl mx-auto">
+
+        <!-- HOME: summary + per-product cards -->
+        <section id="pageHome" class="">
+          <div class="grid md:grid-cols-3 gap-4">
+            <div class="col-span-2 bg-white p-4 rounded shadow">
+              <h2 class="text-lg font-semibold mb-2">ملخص سريع لكل المنتجات</h2>
+              <div id="homeProducts" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+            </div>
+            <div class="bg-white p-4 rounded shadow">
+              <h3 class="font-semibold mb-2">إجمالي سريع</h3>
+              <div class="space-y-2">
+                <div class="p-3 bg-indigo-50 rounded text-center"><div class="text-sm text-gray-600">إجمالي الطلبيات اليوم</div><div id="homeTotalToday" class="text-2xl font-bold">0</div></div>
+                <div class="p-3 bg-emerald-50 rounded text-center"><div class="text-sm text-gray-600">نسبة المؤكدة (اليومي)</div><div id="homeConfirmedPct" class="text-2xl font-bold">0%</div></div>
+                <div class="p-3 bg-yellow-50 rounded text-center"><div class="text-sm text-gray-600">نسبة ليفري (شهري)</div><div id="homeDeliveredPct" class="text-2xl font-bold">0%</div></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- NEW: choose product then fill stats -->
+        <section id="pageNew" class="hidden mt-6">
+          <div class="bg-white p-4 rounded shadow">
+            <h2 class="text-lg font-semibold mb-3">إضافة إحصاء منتج ليوم</h2>
+
+            <div class="grid md:grid-cols-2 gap-4">
+              <div>
+                <label class="block mb-1 font-medium">اختر المنتج</label>
+                <select id="selectProduct" class="w-full border rounded px-3 py-2 mb-3">
+                  <option value="">-- اختر منتج --</option>
+                </select>
+
+                <div id="singleProductForm" class="space-y-3">
+                  <div>
+                    <label class="block text-sm">عدد الطلبيات (count)</label>
+                    <input id="inp_count" type="number" min="0" class="w-full px-3 py-2 border rounded" />
+                  </div>
+                  <div>
+                    <label class="block text-sm">وصلت اليوم (ليفري) — مستقل</label>
+                    <input id="inp_delivered" type="number" min="0" class="w-full px-3 py-2 border rounded" />
+                  </div>
+                </div>
+
+                <div class="mt-3">
+                  <label class="block text-sm">ملاحظات (اختياري)</label>
+                  <textarea id="inp_note" rows="3" class="w-full px-3 py-2 border rounded"></textarea>
+                </div>
+
+                <div class="mt-4 flex gap-2 items-center">
+                  <button id="btnMarkComplete" class="px-4 py-2 bg-sky-600 text-white rounded">وضع كـ مكتمل لهذا المنتج اليوم</button>
+                  <button id="btnClearSingle" class="px-4 py-2 bg-gray-200 rounded">إعادة</button>
+                </div>
+
+                <p id="singleMsg" class="text-sm text-green-600 mt-2"></p>
+              </div>
+
+              <div>
+                <label class="block mb-1 font-medium">الحفظ العام لليوم</label>
+                <div class="mb-2">
+                  <label class="block text-sm">عدد الطلبيات المؤكدة اليوم (مجموع)</label>
+                  <input id="global_confirmed" type="number" min="0" class="w-full px-3 py-2 border rounded" />
+                </div>
+                <div class="mb-2">
+                  <label class="block text-sm">عدد الطلبيات الملغاة اليوم (مجموع)</label>
+                  <input id="global_canceled" type="number" min="0" class="w-full px-3 py-2 border rounded" />
+                </div>
+                <div class="mb-2">
+                  <label class="block text-sm">أسباب الإلغاء (سطر لكل سبب)</label>
+                  <textarea id="global_reasons" rows="3" class="w-full px-3 py-2 border rounded"></textarea>
+                </div>
+
+                <!-- Confirmation step BEFORE saving -->
+                <div class="mt-3 p-3 border rounded bg-gray-50">
+                  <div class="flex items-center gap-2">
+                    <input id="confirmCheck" type="checkbox" class="w-4 h-4" />
+                    <label for="confirmCheck" class="text-sm">أنا متأكدة — لا توجد أخطاء في هذه البيانات</label>
+                  </div>
+                  <div class="mt-3 flex gap-2">
+                    <button id="btnSaveAll" class="px-4 py-2 bg-green-600 text-white rounded" disabled>حفظ جميع بيانات اليوم</button>
+                    <button id="btnCancelSave" class="px-4 py-2 bg-gray-200 rounded">إلغاء</button>
+                  </div>
+                  <p id="saveAllMsg" class="text-sm text-green-600 mt-2"></p>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PRODUCTS management -->
+        <section id="pageProducts" class="hidden mt-6">
+          <div class="bg-white p-4 rounded shadow">
+            <h2 class="text-lg font-semibold mb-3">إدارة المنتجات</h2>
+
+            <div class="flex gap-2 mb-4">
+              <input id="prodName" class="flex-1 px-3 py-2 border rounded" placeholder="اسم المنتج جديد" />
+              <button id="btnAddProd" class="px-4 py-2 bg-blue-600 text-white rounded">إضافة</button>
+            </div>
+
+            <div id="productsTable" class="table-wrap"></div>
+          </div>
+        </section>
+
+        <!-- HISTORY: daily records -->
+        <section id="pageHistory" class="hidden mt-6">
+          <div class="bg-white p-4 rounded shadow">
+            <h2 class="text-lg font-semibold mb-3">سجل الأيام</h2>
+            <div class="flex flex-col md:flex-row gap-2 md:items-center mb-4">
+              <input id="historyDate" type="date" class="px-3 py-2 border rounded" />
+              <button id="btnShowHistory" class="px-4 py-2 bg-blue-600 text-white rounded">عرض</button>
+              <div class="text-sm text-gray-500">عرض سجلات المنتج المحدد لكل يوم.</div>
+            </div>
+
+            <div id="historyResult" class="table-wrap"></div>
+          </div>
+        </section>
+
+        <!-- STATS: monthly delivered percentage and others -->
+        <section id="pageStats" class="hidden mt-6">
+          <div class="bg-white p-4 rounded shadow">
+            <h2 class="text-lg font-semibold mb-3">الإحصاءات</h2>
+
+            <div class="flex flex-col md:flex-row gap-2 items-center mb-4">
+              <label class="text-sm">اختر النطاق:</label>
+              <select id="statsSelector" class="px-3 py-2 border rounded">
+                <option value="thisMonth">هذا الشهر</option>
+                <option value="lastMonth">الشهر الماضي</option>
+                <option value="custom">نطاق شهري مخصص</option>
+                <option value="all">كل البيانات</option>
+              </select>
+
+              <input id="statFrom" type="month" class="px-3 py-2 border rounded hidden" />
+              <input id="statTo" type="month" class="px-3 py-2 border rounded hidden" />
+
+              <button id="btnComputeStats" class="px-4 py-2 bg-indigo-600 text-white rounded">حساب</button>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-3 mb-4">
+              <div class="p-3 bg-indigo-50 rounded text-center"><div class="text-sm text-gray-600">إجمالي الطلبيات (النطاق)</div><div id="statTotal" class="text-2xl font-bold">0</div></div>
+              <div class="p-3 bg-emerald-50 rounded text-center"><div class="text-sm text-gray-600">نسبة المؤكدة</div><div id="statConfirmedPct" class="text-2xl font-bold">0%</div></div>
+              <div class="p-3 bg-yellow-50 rounded text-center"><div class="text-sm text-gray-600">نسبة ليفري (شهري)</div><div id="statDeliveredPct" class="text-2xl font-bold">0%</div></div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4 mb-4">
+              <div class="p-3 bg-white rounded shadow">
+                <h4 class="font-medium mb-2">توزيع الحالة</h4>
+                <canvas id="chartPie"></canvas>
+              </div>
+              <div class="p-3 bg-white rounded shadow">
+                <h4 class="font-medium mb-2">مجموع الطلبيات يوميًا</h4>
+                <canvas id="chartLine"></canvas>
+              </div>
+            </div>
+
+            <div class="p-3 bg-white rounded shadow mb-4">
+              <h4 class="font-medium mb-2">نسبة ليفري حسب كل شهر (رسم)</h4>
+              <canvas id="chartMonthlyDelivered"></canvas>
+            </div>
+
+            <div class="p-3 bg-white rounded shadow">
+              <h4 class="font-medium mb-2">تفاصيل شهرية لكل منتج</h4>
+              <div id="productMonthlyList" class="space-y-3"></div>
+            </div>
+
+          </div>
+        </section>
+
+      </main>
     </div>
+  </div>
 
-    <div id="loginForm" class="form-container w-full max-w-md mx-auto p-6 bg-gray-50 rounded-lg shadow-md">
-        <div class="text-center mb-8">
-            <h2 class="text-4xl font-bold">
-                <span data-ar="تاجر" data-en="Tadjir">تاجر</span>
-                <span class="text-yellow-500 title-highlight" data-ar="هيلب" data-en="Help">هيلب</span>
-            </h2>
-            <p class="text-gray-600 mt-2" data-ar="سجل الدخول إلى حسابك" data-en="Log in to your account">سجل الدخول إلى حسابك</p>
-        </div>
-        <form id="loginFormSubmit" class="space-y-6">
-            <div class="input-field-no-icon">
-                <input class="border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
-                       placeholder="أدخل البريد الإلكتروني" data-ar="أدخل البريد الإلكتروني" data-en="Enter email" 
-                       type="email" id="loginEmail" required/>
-            </div>
-            <div class="input-field">
-                <input class="border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
-                       id="password" placeholder="أدخل كلمة المرور" data-ar="أدخل كلمة المرور" data-en="Enter password" 
-                       type="password" required/>
-                <i class="fas fa-eye" id="togglePassword"></i>
-            </div>
-            <div class="text-left">
-                <a class="text-sm text-gray-600 hover:underline" href="forgot-password.html" data-ar="نسيت كلمة المرور؟" data-en="Forgot Password?">نسيت كلمة المرور؟</a>
-            </div>
-            <p id="loginError" class="text-red-500 text-sm hidden"></p>
-            <button class="btn w-full bg-yellow-500 text-white py-3 rounded-md font-bold hover:bg-yellow-600" 
-                    type="submit" data-ar="تسجيل الدخول" data-en="Login">تسجيل الدخول</button>
-        </form>
-        <div class="mt-6">
-            <button id="googleSignIn" class="google-btn w-full bg-white border border-gray-300 text-gray-700 py-3 rounded-md font-bold flex items-center justify-center space-x-2">
-                <svg class="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-1.02.68-2.31 1.08-3.71 1.08-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C4 20.36 7.9 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.9 1 4 3.64 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-                <span data-ar="تسجيل الدخول عبر Google" data-en="Sign in with Google">تسجيل الدخول عبر Google</span>
-            </button>
-        </div>
-        <div class="text-center mt-6">
-            <p class="text-sm text-gray-600">
-                <span data-ar="ليس لديك حساب؟" data-en="Don't have an account?">ليس لديك حساب؟</span>
-                <a class="text-yellow-500 font-bold cursor-pointer hover:underline" id="showRegisterForm" data-ar="إنشاء حساب" data-en="Create Account">إنشاء حساب</a>
-            </p>
-        </div>
-    </div>
+  <!-- toast container -->
+  <div id="toastWrap" style="pointer-events:none;"></div>
 
-    <div id="registerForm" class="form-container w-full max-w-md mx-auto p-6 bg-gray-50 rounded-lg shadow-md hidden">
-        <div class="text-center mb-8">
-            <h2 class="text-4xl font-bold">
-                <span data-ar="تاجر" data-en="Tadjir">تاجر</span>
-                <span class="text-yellow-500 title-highlight" data-ar="هيلب" data-en="Help">هيلب</span>
-            </h2>
-            <p class="text-gray-600 mt-2" data-ar="أنشئ حسابك الجديد" data-en="Create your new account">أنشئ حسابك الجديد</p>
-        </div>
-        <form id="registrationForm" class="space-y-6">
-            <div class="input-field-no-icon">
-                <input class="border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
-                       placeholder="الاسم الأول" data-ar="الاسم الأول" data-en="First Name" 
-                       type="text" id="firstName" required/>
-            </div>
-            <div class="input-field-no-icon">
-                <input class="border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
-                       placeholder="اسم العائلة" data-ar="اسم العائلة" data-en="Last Name" 
-                       type="text" id="lastName" required/>
-            </div>
-            <div class="input-field-no-icon">
-                <input class="border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
-                       placeholder="أدخل البريد الإلكتروني" data-ar="أدخل البريد الإلكتروني" data-en="Enter email" 
-                       type="email" id="registerEmail" required/>
-            </div>
-            <div class="input-field">
-                <input class="border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
-                       id="registerPassword" placeholder="أدخل كلمة المرور" data-ar="أدخل كلمة المرور" data-en="Enter password" 
-                       type="password" required/>
-                <i class="fas fa-eye" id="toggleRegisterPassword"></i>
-            </div>
-            <div class="input-field">
-                <input class="border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" 
-                       id="confirmPassword" placeholder="تأكيد كلمة المرور" data-ar="تأكيد كلمة المرور" data-en="Confirm password" 
-                       type="password" required/>
-                <i class="fas fa-eye" id="toggleConfirmPassword"></i>
-            </div>
-            <p id="passwordError" class="text-red-500 text-sm hidden" data-ar="كلمات المرور غير متطابقة!" data-en="Passwords do not match!">كلمات المرور غير متطابقة!</p>
-            <p id="registerError" class="text-red-500 text-sm hidden"></p>
-            <button class="btn w-full bg-yellow-500 text-white py-3 rounded-md font-bold hover:bg-yellow-600" 
-                    type="submit" data-ar="تسجيل" data-en="Register">تسجيل</button>
-        </form>
-        <div class="mt-6">
-            <button id="googleSignUp" class="google-btn w-full bg-white border border-gray-300 text-gray-700 py-3 rounded-md font-bold flex items-center justify-center space-x-2">
-                <svg class="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-1.02.68-2.31 1.08-3.71 1.08-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C4 20.36 7.9 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.9 1 4 3.64 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-                <span data-ar="التسجيل عبر Google" data-en="Sign up with Google">التسجيل عبر Google</span>
-            </button>
-        </div>
-        <div class="text-center mt-6">
-            <p class="text-sm text-gray-600">
-                <span data-ar="لديك حساب بالفعل؟" data-en="Already have an account?">لديك حساب بالفعل؟</span>
-                <a class="text-yellow-500 font-bold cursor-pointer hover:underline" id="showLoginForm" data-ar="تسجيل الدخول" data-en="Login">تسجيل الدخول</a>
-            </p>
-        </div>
-    </div>
+  <!-- Firebase + logic -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      query,
+      where,
+      getDocs,
+      orderBy
+    } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
-    <script type="module">
-        // Import Firebase modules
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    // ======= Firebase config (مضمّن كما طلبت) =======
+    const firebaseConfig = {
+      apiKey: "AIzaSyD2ddRXrr2phXa54q37nq28F5xFDC7pa6E",
+      authDomain: "orders-tracker-8265e.firebaseapp.com",
+      projectId: "orders-tracker-8265e",
+      storageBucket: "orders-tracker-8265e.appspot.com",
+      messagingSenderId: "901944393997",
+      appId: "1:901944393997:web:b0e5fc7941710fe9c6b044"
+    };
 
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyCCQRblRXdM9vHYk_vitoMaDihD-YlXwzc",
-            authDomain: "login-5ab63.firebaseapp.com",
-            projectId: "login-5ab63",
-            storageBucket: "login-5ab63.firebasestorage.app",
-            messagingSenderId: "114075832736",
-            appId: "1:114075832736:web:ea26dba6a7250417c594c5",
-            measurementId: "G-W61905Q2Q1"
-        };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const googleProvider = new GoogleAuthProvider();
+    // helpers
+    const $ = id => document.getElementById(id);
+    const todayIso = () => new Date().toISOString().slice(0,10);
+    const nowMonth = () => new Date().toISOString().slice(0,7);
 
-        // التحقق من حالة تسجيل الدخول
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                window.location.href = 'dashboard.html';
-            }
-        });
+    // local products store
+    let products = JSON.parse(localStorage.getItem('ot_products') || '[]');
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const togglePassword = document.querySelector('#togglePassword');
-            const password = document.querySelector('#password');
-            const toggleRegisterPassword = document.querySelector('#toggleRegisterPassword');
-            const registerPassword = document.querySelector('#registerPassword');
-            const toggleConfirmPassword = document.querySelector('#toggleConfirmPassword');
-            const confirmPassword = document.querySelector('#confirmPassword');
-            const showRegisterForm = document.querySelector('#showRegisterForm');
-            const showLoginForm = document.querySelector('#showLoginForm');
-            const loginForm = document.querySelector('#loginForm');
-            const registerForm = document.querySelector('#registerForm');
-            const passwordError = document.querySelector('#passwordError');
-            const registerError = document.querySelector('#registerError');
-            const loginError = document.querySelector('#loginError');
-            const registrationForm = document.querySelector('#registrationForm');
-            const loginFormSubmit = document.querySelector('#loginFormSubmit');
-            const toggleDarkMode = document.querySelector('#toggleDarkMode');
-            const toggleLanguage = document.querySelector('#toggleLanguage');
-            const htmlRoot = document.querySelector('#htmlRoot');
-            const googleSignIn = document.querySelector('#googleSignIn');
-            const googleSignUp = document.querySelector('#googleSignUp');
+    // Sidebar toggle mobile
+    const sidebar = $('sidebar');
+    const openSidebar = $('openSidebar');
+    const closeSidebar = $('closeSidebar');
+    const backdrop = $('backdrop');
+    openSidebar.onclick = () => { sidebar.style.transform='translateX(0)'; backdrop.classList.remove('hidden'); backdrop.classList.add('sidebar-backdrop'); };
+    closeSidebar.onclick = () => { sidebar.style.transform='translateX(100%)'; backdrop.classList.add('hidden'); };
+    backdrop.onclick = closeSidebar;
+    if (window.innerWidth < 768) sidebar.style.transform='translateX(100%)';
 
-            function togglePasswordVisibility(input, toggle) {
-                if (input && toggle) {
-                    toggle.addEventListener('click', () => {
-                        const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
-                        input.setAttribute('type', type);
-                        toggle.classList.toggle('fa-eye-slash');
-                    });
-                }
-            }
-            togglePasswordVisibility(password, togglePassword);
-            togglePasswordVisibility(registerPassword, toggleRegisterPassword);
-            togglePasswordVisibility(confirmPassword, toggleConfirmPassword);
+    // nav
+    document.querySelectorAll('.navBtn').forEach(btn => btn.onclick = (e) => { showPage(e.currentTarget.dataset.page); });
 
-            if (showRegisterForm) {
-                showRegisterForm.addEventListener('click', () => {
-                    loginForm.classList.add('hidden');
-                    registerForm.classList.remove('hidden');
-                    registerForm.style.animation = 'slideIn 0.5s ease forwards';
-                });
-            }
-            if (showLoginForm) {
-                showLoginForm.addEventListener('click', () => {
-                    registerForm.classList.add('hidden');
-                    loginForm.classList.remove('hidden');
-                    loginForm.style.animation = 'slideIn 0.5s ease forwards';
-                });
-            }
+    function showPage(page) {
+      ['pageHome','pageNew','pageProducts','pageHistory','pageStats'].forEach(id => $(id).classList.add('hidden'));
+      if (page === 'home') $('pageHome').classList.remove('hidden');
+      if (page === 'new') $('pageNew').classList.remove('hidden');
+      if (page === 'products') $('pageProducts').classList.remove('hidden');
+      if (page === 'history') $('pageHistory').classList.remove('hidden');
+      if (page === 'stats') $('pageStats').classList.remove('hidden');
+      // close mobile sidebar
+      if (window.innerWidth < 768) { sidebar.style.transform='translateX(100%)'; backdrop.classList.add('hidden'); }
+      // refresh homepage when opened
+      if (page === 'home') loadHomeSummary();
+    }
 
-            if (confirmPassword) {
-                confirmPassword.addEventListener('input', () => {
-                    if (registerPassword.value !== confirmPassword.value) {
-                        passwordError.classList.remove('hidden');
-                    } else {
-                        passwordError.classList.add('hidden');
-                    }
-                });
-            }
+    // initial page
+    showPage('home');
 
-            if (loginFormSubmit) {
-                loginFormSubmit.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const email = document.querySelector('#loginEmail').value;
-                    const password = document.querySelector('#password').value;
-                    const submitButton = loginFormSubmit.querySelector('button');
-                    submitButton.disabled = true;
-                    submitButton.textContent = currentLang === 'ar' ? 'جارٍ التحميل...' : 'Loading...';
+    // utility: toast
+    function showToast(msg, time=2500) {
+      const wrap = $('toastWrap');
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.textContent = msg;
+      wrap.appendChild(t);
+      setTimeout(()=> { t.remove(); }, time);
+    }
 
-                    if (!email || !password) {
-                        loginError.classList.remove('hidden');
-                        loginError.textContent = currentLang === 'ar' ? 'يرجى إدخال البريد وكلمة المرور' : 'Please enter email and password';
-                        submitButton.disabled = false;
-                        submitButton.textContent = currentLang === 'ar' ? 'تسجيل الدخول' : 'Login';
-                        return;
-                    }
+    // ---------- Products management ----------
+    function renderProductsTable() {
+      const cont = $('productsTable');
+      if (!products.length) {
+        cont.innerHTML = `<div class="p-3 text-gray-500">لا توجد منتجات — أضف منتجًا جديدًا.</div>`;
+        populateProductSelect();
+        return;
+      }
+      let html = `<div class="overflow-x-auto"><table class="w-full text-right border"><thead class="bg-gray-100"><tr><th class="p-2">المنتج</th><th class="p-2">العمليات</th></tr></thead><tbody>`;
+      products.forEach(p => {
+        html += `<tr class="border-t"><td class="p-2">${p}</td><td class="p-2"><button class="px-3 py-1 bg-red-100 text-red-600 rounded btnDel" data-prod="${p}">حذف</button></td></tr>`;
+      });
+      html += `</tbody></table></div>`;
+      cont.innerHTML = html;
+      document.querySelectorAll('.btnDel').forEach(b => b.onclick = (e) => {
+        const name = e.currentTarget.dataset.prod;
+        if (!confirm('هل تريد حذف المنتج: ' + name + ' ؟ ستفقد أي إدخالات مستقبلية مخصصة له.')) return;
+        products = products.filter(x => x !== name);
+        localStorage.setItem('ot_products', JSON.stringify(products));
+        renderProductsTable();
+        renderProductsSelectOptions();
+        showToast('تم حذف المنتج');
+      });
+      populateProductSelect();
+    }
 
-                    try {
-                        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                        console.log('تم تسجيل الدخول بنجاح:', userCredential.user);
-                        window.location.href = 'dashboard.html';
-                    } catch (error) {
-                        loginError.classList.remove('hidden');
-                        loginError.textContent = currentLang === 'ar' ? 
-                            (error.code === 'auth/wrong-password' ? 'كلمة المرور غير صحيحة' : 
-                             error.code === 'auth/user-not-found' ? 'المستخدم غير موجود' : 
-                             error.message) : 
-                            error.message;
-                        console.error('خطأ في تسجيل الدخول:', error.code, error.message);
-                    } finally {
-                        submitButton.disabled = false;
-                        submitButton.textContent = currentLang === 'ar' ? 'تسجيل الدخول' : 'Login';
-                    }
-                });
-            }
+    $('btnAddProd').onclick = () => {
+      const v = $('prodName').value.trim();
+      if (!v) return alert('أدخل اسم المنتج');
+      if (products.includes(v)) return alert('المنتج موجود بالفعل');
+      products.push(v);
+      localStorage.setItem('ot_products', JSON.stringify(products));
+      $('prodName').value = '';
+      renderProductsTable();
+      showToast('تم إضافة المنتج');
+    };
 
-            if (registrationForm) {
-                registrationForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const firstName = document.querySelector('#firstName').value;
-                    const lastName = document.querySelector('#lastName').value;
-                    const email = document.querySelector('#registerEmail').value;
-                    const password = registerPassword.value;
-                    const confirmPasswordVal = confirmPassword.value;
-                    const submitButton = registrationForm.querySelector('button');
-                    submitButton.disabled = true;
-                    submitButton.textContent = currentLang === 'ar' ? 'جارٍ التحميل...' : 'Loading...';
+    function populateProductSelect() {
+      const sel = $('selectProduct');
+      sel.innerHTML = `<option value="">-- اختر منتج --</option>`;
+      products.forEach(p => {
+        const opt = document.createElement('option'); opt.value = p; opt.textContent = p;
+        sel.appendChild(opt);
+      });
+    }
 
-                    if (!email || !password || !firstName || !lastName) {
-                        registerError.classList.remove('hidden');
-                        registerError.textContent = currentLang === 'ar' ? 'يرجى ملء جميع الحقول' : 'Please fill all fields';
-                        submitButton.disabled = false;
-                        submitButton.textContent = currentLang === 'ar' ? 'تسجيل' : 'Register';
-                        return;
-                    }
+    renderProductsTable();
 
-                    if (password !== confirmPasswordVal) {
-                        passwordError.classList.remove('hidden');
-                        submitButton.disabled = false;
-                        submitButton.textContent = currentLang === 'ar' ? 'تسجيل' : 'Register';
-                        return;
-                    }
+    // ---------- Single product entry (in New) ----------
+    $('btnMarkComplete').onclick = () => {
+      const prod = $('selectProduct').value;
+      if (!prod) return alert('اختر منتجًا أولاً');
+      const cnt = parseInt($('inp_count').value || 0);
+      const del = parseInt($('inp_delivered').value || 0);
+      // If both are zero, warn
+      if (cnt === 0 && del === 0) return alert('أدخل قيمة للعدد أو للوصول (ليفري)');
+      // Show temporary message that this product marked complete for today (but not yet saved to Firestore until full save)
+      $('singleMsg').textContent = `تم تسجيل إحصاء ${prod} لهذا اليوم (لم يتم الحفظ النهائي بعد).`;
+      // Save to a temporary local store (session) to be included on final save OR allow immediate saving of single product?
+      // We'll store temporary entries in sessionStorage 'ot_pending' as array
+      const pending = JSON.parse(sessionStorage.getItem('ot_pending') || '[]');
+      // ensure each product/day only one pending — overwrite if exists
+      const date = todayIso();
+      const filtered = pending.filter(x => !(x.product === prod && x.date === date));
+      filtered.push({
+        date,
+        month: date.slice(0,7),
+        product: prod,
+        count: cnt,
+        delivered: del,
+        note: $('inp_note').value.trim(),
+        timestamp: new Date().toISOString()
+      });
+      sessionStorage.setItem('ot_pending', JSON.stringify(filtered));
+      showToast('تم وضع الإحصاء مؤقتًا. اضغطي \"أنا متأكدة\" ثم \"حفظ جميع بيانات اليوم\" للحفظ في السحابة.');
+      // optionally clear inputs for further entries
+      $('inp_count').value = ''; $('inp_delivered').value = ''; $('inp_note').value = '';
+      // update homepage preview quickly (local)
+      loadHomeSummary(); // will include pending as well
+    };
 
-                    try {
-                        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                        console.log('تم إنشاء الحساب بنجاح:', userCredential.user);
-                        window.location.href = 'dashboard.html';
-                    } catch (error) {
-                        registerError.classList.remove('hidden');
-                        registerError.textContent = currentLang === 'ar' ? 
-                            (error.code === 'auth/email-already-in-use' ? 'البريد الإلكتروني مستخدم بالفعل' : error.message) : 
-                            error.message;
-                        console.error('خطأ في إنشاء الحساب:', error.code, error.message);
-                    } finally {
-                        submitButton.disabled = false;
-                        submitButton.textContent = currentLang === 'ar' ? 'تسجيل' : 'Register';
-                    }
-                });
-            }
+    // Confirmation checkbox enabling save
+    $('confirmCheck').onchange = (e) => {
+      $('btnSaveAll').disabled = !e.target.checked;
+    };
 
-            function handleGoogleAuth(button, actionText, errorElement) {
-                button.addEventListener('click', async () => {
-                    button.disabled = true;
-                    const originalText = button.querySelector('span').textContent;
-                    button.querySelector('span').textContent = currentLang === 'ar' ? 'جارٍ التحميل...' : 'Loading...';
-
-                    try {
-                        const result = await signInWithPopup(auth, googleProvider);
-                        console.log(`${actionText} باستخدام Google:`, result.user);
-                        window.location.href = 'dashboard.html';
-                    } catch (error) {
-                        errorElement.classList.remove('hidden');
-                        errorElement.textContent = currentLang === 'ar' ?
-                            (error.code === 'auth/popup-blocked' ? 'تم حظر النافذة المنبثقة، الرجاء السماح بها' : error.message) :
-                            error.message;
-                        console.error(`خطأ في ${actionText} عبر Google:`, error.code, error.message);
-                    } finally {
-                        button.disabled = false;
-                        button.querySelector('span').textContent = originalText;
-                    }
-                });
-            }
-
-            if (googleSignIn) handleGoogleAuth(googleSignIn, 'تسجيل الدخول', loginError);
-            if (googleSignUp) handleGoogleAuth(googleSignUp, 'التسجيل', registerError);
-
-            let currentLang = localStorage.getItem('language') || 'ar';
-            if (toggleDarkMode) {
-                const isDark = localStorage.getItem('darkMode') === 'true';
-                if (isDark) {
-                    document.body.classList.add('dark-mode');
-                    toggleDarkMode.innerHTML = '<i class="fas fa-sun"></i>';
-                }
-                toggleDarkMode.addEventListener('click', () => {
-                    document.body.classList.toggle('dark-mode');
-                    const isDark = document.body.classList.contains('dark-mode');
-                    toggleDarkMode.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-                    localStorage.setItem('darkMode', isDark);
-                    updateTextContent();
-                });
-            }
-
-            const eyeIcons = [togglePassword, toggleRegisterPassword, toggleConfirmPassword];
-            if (toggleLanguage) {
-                htmlRoot.setAttribute('lang', currentLang);
-                htmlRoot.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
-                toggleLanguage.textContent = currentLang === 'ar' ? 'EN' : 'AR';
-                updateTextContent();
-
-                toggleLanguage.addEventListener('click', () => {
-                    currentLang = currentLang === 'ar' ? 'en' : 'ar';
-                    htmlRoot.setAttribute('lang', currentLang);
-                    htmlRoot.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
-                    toggleLanguage.textContent = currentLang === 'ar' ? 'EN' : 'AR';
-                    localStorage.setItem('language', currentLang);
-                    updateTextContent();
-                    eyeIcons.forEach(icon => {
-                        if (currentLang === 'ar') {
-                            icon.classList.remove('right-3');
-                            icon.classList.add('left-3');
-                        } else {
-                            icon.classList.remove('left-3');
-                            icon.classList.add('right-3');
-                        }
-                    });
-                });
-            }
-
-            function updateTextContent() {
-                document.querySelectorAll('[data-ar][data-en]').forEach(element => {
-                    const text = element.getAttribute(`data-${currentLang}`);
-                    if (element.tagName === 'INPUT') {
-                        element.placeholder = text;
-                    } else if (element.tagName === 'TITLE') {
-                        document.title = text;
-                    } else {
-                        element.textContent = text;
-                    }
-                });
-            }
-
-            eyeIcons.forEach(icon => {
-                if (icon) icon.classList.add('left-3');
-            });
-        });
-    </script>
-</body>
-</html>
+    // Save all pending entries + global confirmed/canceled into Firestore
+    $('btnSaveAll').onclick = async () => {
+      const pending = JSON.parse(sessionStorage.getItem('ot_pending') || '[]');
+      if (pending.length === 0) return alert('لا توجد إدخالات مؤقتة للحفظ. أضف بيانات المنتجات أولًا.');
+      const confirmed = parseInt($('global_confirmed').value || 0);
+      const canceled = parseInt($('global_canceled').value || 0);
+      const reasons = $('global_reasons').value.trim().split('\n').filter(r=>r);
+      // Build docs: for each pending product, add confirmed/canceled values as global fields (they are same for each doc as per earlier design)
+      const docs = pending.map(p => ({
+        date: p.date,
+        month: p.month,
+        product: p.product,
+        count: parseInt(p.count || 0),
+        delivered: parseInt(p.delivered || 0),
+        type: 'جديدة',
+        confirmed,
+        canceled,
+        reasons,
+        note: p.note || '',
+        timestamp: p.timestamp
+      }));
+      try {
+        $('saveAllMsg').textContent = 'جاري حفظ البيانات...';
+        await Promise.all(docs.map(d => addDoc(collection(db,'orders'), d)));
+        sessionStorage.removeItem('ot_pending');
+        $('saveAllMsg').textContent = 'تم الحفظ في السحابة ✅';
+        $('global_confirmed').value=''; $('global_canceled').value=''; $('global_reasons').value='';
+        $('confirmCheck').checked = false; $('btnSaveAll').disabled = true;
+        showToast('تم حفظ بيانات اليوم بنجاح');
+        l
